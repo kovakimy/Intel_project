@@ -45,18 +45,18 @@ ReidentificationNet::ReidentificationNet(const string& _model_xml, const string&
 	input_info_reid = bin_network.getInputsInfo().begin()->second;
 	out_info_reid = bin_network.getOutputsInfo().begin()->second;
 	input_name = bin_network.getInputsInfo().begin()->first;
-	output_name = bin_network.getInputsInfo().begin()->first;
+	output_name = bin_network.getOutputsInfo().begin()->first;
 	input_shapes = bin_network.getInputShapes();
 
 	//configure input
-	input_info_reid->setPrecision(InferenceEngine::Precision::U8);
-	input_info_reid->setLayout(InferenceEngine::Layout::NCHW);
-	input_info_reid->getPreProcess().setResizeAlgorithm(InferenceEngine::RESIZE_BILINEAR);
-	input_info_reid->getPreProcess().setColorFormat(InferenceEngine::ColorFormat::RGB);
+	input_info_reid->setPrecision(Precision::U8);
+	input_info_reid->setLayout(Layout::NCHW);
+	input_info_reid->getPreProcess().setResizeAlgorithm(RESIZE_BILINEAR);
+	input_info_reid->getPreProcess().setColorFormat(ColorFormat::RGB);
 
 	//configure otput
-	out_info_reid->setPrecision(InferenceEngine::Precision::FP16);
-	out_info_reid->setLayout(InferenceEngine::Layout::NC);
+	out_info_reid->setPrecision(Precision::FP16);
+	out_info_reid->setLayout(Layout::NC);
 
 	//4) Load the model to the device using InferenceEngine::Core::LoadNetwork():
 	executable_network = ie.LoadNetwork(bin_network, "CPU");
@@ -101,7 +101,7 @@ void ReidentificationNet::submitRequest(bool isAsync) {
 	if (!isAsync) request.Infer();
 	else {
 		request.StartAsync();
-		request.Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
+		request.Wait(IInferRequest::WaitMode::RESULT_READY);
 	};
 }
 Blob::Ptr ReidentificationNet::getResults() {

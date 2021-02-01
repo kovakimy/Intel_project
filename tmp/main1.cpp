@@ -56,6 +56,6 @@ int main() {
 	ri.submitRequest(false);
 	auto ress = ri.getResults();
 
-	cout << "test";// << *ress;
+	cout << "test";// 
 	return 0;
 }
