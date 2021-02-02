@@ -1,6 +1,5 @@
 #include <string>
 #include <ie_core.hpp>
-#include <opencv2/imgproc.hpp>
 #include <vector>
 #include <opencv2/core.hpp>
 
@@ -25,7 +24,6 @@ public:
 	InferenceEngine::Core ie;
 	InferenceEngine::CNNNetwork cnnNetwork;
 	std::string modelPath, configPath;
-	Detector(std::string modelPath, std::string configPath);
-	void getDetections(cv::Mat image);
-	std::vector<DetectionObject> detectedObjects;
+	Detector(std::string &modelPath, std::string &configPath);
+    std::vector<DetectionObject> getDetections(cv::Mat &image);
 };
