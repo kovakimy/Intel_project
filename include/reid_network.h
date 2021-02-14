@@ -9,6 +9,8 @@
 
 class Reidentification_results{};
 
+float cosineSimilarity(const float* , const float* , size_t );
+
 class ReidentificationNet {
 private:
 
@@ -17,16 +19,16 @@ private:
     InferenceEngine::CNNNetwork bin_network;
     InferenceEngine::ExecutableNetwork executable_network;
 
-    std::string model_xml;
-    std::string model_bin;
+    std::string modelXml;
+    std::string modelBin;
 
-    InferenceEngine::InputInfo::Ptr input_info_reid;
-    InferenceEngine::DataPtr  out_info_reid;
+    InferenceEngine::InputInfo::Ptr inputInfoReid;
+    InferenceEngine::DataPtr  outInfoReid;
   //  InferenceEngine::InputsDataMap input_info_reid;
   //  InferenceEngine::OutputsDataMap  out_info_reid;
-    std::string input_name;
-    std::string output_name;
-    InferenceEngine::ICNNNetwork::InputShapes input_shapes;
+    std::string inputName;
+    std::string outputName;
+    InferenceEngine::ICNNNetwork::InputShapes inputShapes;
 
     float width_ = 0;
     float height_ = 0;
@@ -35,19 +37,19 @@ public:
     ReidentificationNet(const std::string&, const std::string&,
         const InferenceEngine::Core&);
 
-    InferenceEngine::InputInfo::Ptr get_input();
+    InferenceEngine::InputInfo::Ptr getInput();
 
-    InferenceEngine::DataPtr get_output();
+    InferenceEngine::DataPtr getOutput();
 
-    InferenceEngine::ICNNNetwork::InputShapes get_input_shape();
+    InferenceEngine::ICNNNetwork::InputShapes getInputShape();
 
-    std::string get_input_name();
+    std::string getInputName();
 
-    std::string get_output_name();
+    std::string getOutputName();
 
     void createRequest(const cv::Mat &);
 
     void submitRequest(bool isAsync);
 
-    InferenceEngine::Blob::Ptr getResults();
+    const float* getResults();
 };

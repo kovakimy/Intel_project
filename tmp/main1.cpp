@@ -16,16 +16,17 @@ using namespace std;
 using namespace cv;
 
 int main() {
-
-	std::string image_path = "F:/obj_det_prj/997.png";
+	std::string image_path = "F:/obj_det_prj/test/ped1.png";
 	Mat img = imread(image_path, IMREAD_COLOR);
 	if (img.empty())
 	{
 		std::cout << "Could not read the image: " << image_path << std::endl;
 		return 1;
 	}
+
+
 	//img.resize(100);
-	imshow("Display window", img);
+	//imshow("Display window", img);
 	Mat res;
 //	cv::Mat::resize(img, res, cv::Size(100,100));
 	//img.resize(100);
@@ -50,12 +51,26 @@ int main() {
 	//InferenceEngine::CNNNetwork bin_network =_ie.ReadNetwork(s3+s1, s3+s2);
 	ReidentificationNet ri(s3 + s1, s3 + s2, ie);
 
-	auto nnn = ri.get_input_shape();
+	auto nnn = ri.getInputShape();
 
-	ri.createRequest(img);
-	ri.submitRequest(false);
-	auto ress = ri.getResults();
+	 ri.createRequest(img);
+	 ri.submitRequest(false);
+	// const float* ress1 = new float[256];
+	// ress1 = ri.getResults();
+	   float* ress1 = (float*) calloc(256, sizeof(float));
+	  memcpy(ress1, ri.getResults(), 256);
 
-	cout << "test";// 
+	 image_path = "F:/obj_det_prj/test/ped5.png";
+	 img = imread(image_path, IMREAD_COLOR);
+
+	 ri.createRequest(img);
+	 ri.submitRequest(false);
+	 float* ress2 = (float*)calloc(256, sizeof(float));
+	 memcpy(ress2, ri.getResults(), 256);
+
+	 cout << cosineSimilarity(ress1, ress2, 256) << endl;
+
+	cout << "test";//
+	
 	return 0;
 }

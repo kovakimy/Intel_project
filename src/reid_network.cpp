@@ -1,4 +1,5 @@
 #include "F:\obj_det_prj\include\reid_network.h"
+//#include <samples/ocv_common.hpp>
 
 #include <vector>
 #include <iostream>
@@ -32,55 +33,69 @@ static InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat)
 	return InferenceEngine::make_shared_blob<uint8_t>(tDesc, mat.data);
 };
 
+float cosineSimilarity(const float* A, const float* B, size_t size) {
+	float res = 0;
+	float sumA2 = 0;
+	float sumB2 = 0;
+	float sumAB = 0;
+	for (size_t i = 0; i < size; ++i) {
+		sumAB += A[i] * B[i];
+		sumA2 += A[i] * A[i];
+		sumB2 += B[i] * B[i];
+	}
+	res = sumAB / (sqrt(sumA2) * sqrt(sumB2));
+	return res;
+};
+
 
 ReidentificationNet::ReidentificationNet(const string& _model_xml, const string& _model_bin,
 	const Core& _ie) :
-	model_xml(_model_xml), model_bin(_model_bin), ie(_ie)
+	modelXml(_model_xml), modelBin(_model_bin), ie(_ie)
 {
 	//2) Read a model IR created by the Model Optimizer (.xml is supported format):
 	bin_network = ie.ReadNetwork(_model_xml, _model_bin);// , model_bin);
 
 	//3) Configure input and output. Request input and output information using InferenceEngine::CNNNetwork::getInputsInfo(), 
 	//and InferenceEngine::CNNNetwork::getOutputsInfo() methods:
-	input_info_reid = bin_network.getInputsInfo().begin()->second;
-	out_info_reid = bin_network.getOutputsInfo().begin()->second;
-	input_name = bin_network.getInputsInfo().begin()->first;
-	output_name = bin_network.getOutputsInfo().begin()->first;
-	input_shapes = bin_network.getInputShapes();
+	inputInfoReid = bin_network.getInputsInfo().begin()->second;
+	outInfoReid = bin_network.getOutputsInfo().begin()->second;
+	inputName = bin_network.getInputsInfo().begin()->first;
+	outputName = bin_network.getOutputsInfo().begin()->first;
+	inputShapes = bin_network.getInputShapes();
 
 	//configure input
-	input_info_reid->setPrecision(Precision::U8);
-	input_info_reid->setLayout(Layout::NCHW);
-	input_info_reid->getPreProcess().setResizeAlgorithm(RESIZE_BILINEAR);
-	input_info_reid->getPreProcess().setColorFormat(ColorFormat::RGB);
+	inputInfoReid->setPrecision(Precision::U8);
+	inputInfoReid->setLayout(Layout::NCHW);
+	inputInfoReid->getPreProcess().setResizeAlgorithm(RESIZE_BILINEAR);
+	inputInfoReid->getPreProcess().setColorFormat(ColorFormat::RGB);
 
 	//configure otput
-	out_info_reid->setPrecision(Precision::FP16);
-	out_info_reid->setLayout(Layout::NC);
+	outInfoReid->setPrecision(Precision::FP16);
+	outInfoReid->setLayout(Layout::NC);
 
 	//4) Load the model to the device using InferenceEngine::Core::LoadNetwork():
 	executable_network = ie.LoadNetwork(bin_network, "CPU");
 
 };
 
-InputInfo::Ptr ReidentificationNet::get_input() {
-	return input_info_reid;
+InputInfo::Ptr ReidentificationNet::getInput() {
+	return inputInfoReid;
 };
 
-DataPtr ReidentificationNet::get_output() {
-	return out_info_reid;
+DataPtr ReidentificationNet::getOutput() {
+	return outInfoReid;
 };
 
-string ReidentificationNet::get_input_name() {
-	return input_name;
+string ReidentificationNet::getInputName() {
+	return inputName;
 };
 
-string ReidentificationNet::get_output_name() {
-	return output_name;
+string ReidentificationNet::getOutputName() {
+	return outputName;
 };
 
-ICNNNetwork::InputShapes ReidentificationNet::get_input_shape() {
-	return input_shapes;
+ICNNNetwork::InputShapes ReidentificationNet::getInputShape() {
+	return inputShapes;
 };
 
 void ReidentificationNet::createRequest(const cv::Mat &pic_part){
@@ -90,7 +105,7 @@ void ReidentificationNet::createRequest(const cv::Mat &pic_part){
 	6) Prepare input
 	*/
 	Blob::Ptr imgBlob = wrapMat2Blob(pic_part);
-    request.SetBlob(input_name, imgBlob);
+    request.SetBlob(inputName, imgBlob);
 
 	width_ = static_cast<float>(pic_part.cols);
 	height_ = static_cast<float>(pic_part.rows);
@@ -104,16 +119,15 @@ void ReidentificationNet::submitRequest(bool isAsync) {
 		request.Wait(IInferRequest::WaitMode::RESULT_READY);
 	};
 }
-Blob::Ptr ReidentificationNet::getResults() {
+const float* ReidentificationNet::getResults() {
 		//8) Go over the output blobs and process the results.
-		Blob::Ptr output = request.GetBlob(output_name);
-		//results
-	//	return output;
-		using myBlobType = InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP16>::value_type;
+		Blob::Ptr output = request.GetBlob(outputName);
+		using myBlobType = PrecisionTrait<Precision::FP16>::value_type;
 	//	TBlob<myBlobType>& tblob = dynamic_cast<TBlob<myBlobType>&>(*output);
 	    auto const memLocker = output->cbuffer(); // use const memory locker
 	 // output_buffer is valid as long as the lifetime of memLocker
 		const float* output_buffer = memLocker.as<const float*>();
-		return output;
+		const float* A = output_buffer;
+		return output_buffer;
 
 	};
