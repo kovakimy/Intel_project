@@ -24,17 +24,9 @@ int main() {
 		return 1;
 	}
 
-
-	//img.resize(100);
-	//imshow("Display window", img);
+;
 	Mat res;
-//	cv::Mat::resize(img, res, cv::Size(100,100));
-	//img.resize(100);
-	//int k = waitKey(0); // Wait for a keystroke in the window
-//	if (k == 's')
-//	{
-//		imwrite("starry_night.png", img);
-//	}
+
 
 	//const char model_reid1[] = "model_name.xml";
 	//const char model_reid2[] = "model_name.bin";
@@ -53,22 +45,22 @@ int main() {
 
 	auto nnn = ri.getInputShape();
 
-	 ri.createRequest(img);
-	 ri.submitRequest(false);
+	ri.createRequest(img);
+	ri.submitRequest(false);
 	// const float* ress1 = new float[256];
 	// ress1 = ri.getResults();
-	   float* ress1 = (float*) calloc(256, sizeof(float));
-	  memcpy(ress1, ri.getResults(), 256);
+	float* ress1 = (float*) calloc(256, sizeof(float));
+	memcpy(ress1, ri.getResults(), 256);
 
-	 image_path = "F:/obj_det_prj/test/ped5.png";
-	 img = imread(image_path, IMREAD_COLOR);
+	image_path = "F:/obj_det_prj/test/ped5.png";
+	img = imread(image_path, IMREAD_COLOR);
 
-	 ri.createRequest(img);
-	 ri.submitRequest(false);
-	 float* ress2 = (float*)calloc(256, sizeof(float));
-	 memcpy(ress2, ri.getResults(), 256);
+	ri.createRequest(img);
+	ri.submitRequest(false);
+	float* ress2 = (float*)calloc(256, sizeof(float));
+	memcpy(ress2, ri.getResults(), 256);
 
-	 cout << cosineSimilarity(ress1, ress2, 256) << endl;
+	cout << cosineSimilarity(ress1, ress2, 256) << endl;
 
 	cout << "test";//
 	

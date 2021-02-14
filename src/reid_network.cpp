@@ -123,7 +123,7 @@ const float* ReidentificationNet::getResults() {
 		//8) Go over the output blobs and process the results.
 		Blob::Ptr output = request.GetBlob(outputName);
 		using myBlobType = PrecisionTrait<Precision::FP16>::value_type;
-	//	TBlob<myBlobType>& tblob = dynamic_cast<TBlob<myBlobType>&>(*output);
+	 //	TBlob<myBlobType>& tblob = dynamic_cast<TBlob<myBlobType>&>(*output);
 	    auto const memLocker = output->cbuffer(); // use const memory locker
 	 // output_buffer is valid as long as the lifetime of memLocker
 		const float* output_buffer = memLocker.as<const float*>();

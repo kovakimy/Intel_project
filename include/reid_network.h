@@ -24,8 +24,6 @@ private:
 
     InferenceEngine::InputInfo::Ptr inputInfoReid;
     InferenceEngine::DataPtr  outInfoReid;
-  //  InferenceEngine::InputsDataMap input_info_reid;
-  //  InferenceEngine::OutputsDataMap  out_info_reid;
     std::string inputName;
     std::string outputName;
     InferenceEngine::ICNNNetwork::InputShapes inputShapes;
