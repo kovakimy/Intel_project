@@ -1,6 +1,6 @@
 #include <iostream>
 #include "../include/detector.hpp"
-#include "../include/reid_network.h"
+#include "../include/reid_network.hpp"
 #include "../include/LineCrossingDetection.hpp"
 #include "../include/AreaIntrusionDetection.hpp"
 #include <opencv2/imgproc.hpp>
