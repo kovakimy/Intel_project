@@ -47,6 +47,20 @@ float cosineSimilarity(const float* A, const float* B, size_t size) {
 	return res;
 };
 
+float cosineSimilarity(std::vector<float>& A, std::vector<float>& B, size_t size) {
+	float res = 0;
+	float sumA2 = 0;
+	float sumB2 = 0;
+	float sumAB = 0;
+	for (size_t i = 0; i < size; ++i) {
+		sumAB += A[i] * B[i];
+		sumA2 += A[i] * A[i];
+		sumB2 += B[i] * B[i];
+	}
+	res = sumAB / (sqrt(sumA2) * sqrt(sumB2));
+	return res;
+};
+
 
 ReidentificationNet::ReidentificationNet(const string& _model_xml, const string& _model_bin,
 	const Core& _ie) :
@@ -127,7 +141,16 @@ const float* ReidentificationNet::getResults() {
 	    auto const memLocker = output->cbuffer(); // use const memory locker
 	 // output_buffer is valid as long as the lifetime of memLocker
 		const float* output_buffer = memLocker.as<const float*>();
-		const float* A = output_buffer;
 		return output_buffer;
-
 	};
+
+std::vector<float> ReidentificationNet::doEverything(const cv::Mat& picPart) {
+	this->createRequest(picPart);
+	this->submitRequest(false);
+	auto vectorData = this->getResults();
+	vector<float> resVector(256);
+	for (size_t i = 0; i < 256; ++i) {
+		resVector[i]=vectorData[i];
+	}
+	return resVector;
+};

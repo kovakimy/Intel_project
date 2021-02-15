@@ -4,7 +4,6 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
-//#include <inference_engine.hpp>
 //#include <ie_core.hpp>
 #include <inference_engine.hpp>
 
@@ -16,11 +15,11 @@ using namespace std;
 using namespace cv;
 
 int main() {
-	std::string image_path = "F:/obj_det_prj/test/ped1.png";
-	Mat img = imread(image_path, IMREAD_COLOR);
-	if (img.empty())
+	std::string image_path1 = "F:/obj_det_prj/test/ped1.png";
+	Mat img1 = imread(image_path1, IMREAD_COLOR);
+	if (img1.empty())
 	{
-		std::cout << "Could not read the image: " << image_path << std::endl;
+		std::cout << "Could not read the image: " << image_path1 << std::endl;
 		return 1;
 	}
 
@@ -45,22 +44,27 @@ int main() {
 
 	auto nnn = ri.getInputShape();
 
-	ri.createRequest(img);
+	ri.createRequest(img1);
 	ri.submitRequest(false);
 	// const float* ress1 = new float[256];
 	// ress1 = ri.getResults();
 	float* ress1 = (float*) calloc(256, sizeof(float));
 	memcpy(ress1, ri.getResults(), 256);
 
-	image_path = "F:/obj_det_prj/test/ped5.png";
-	img = imread(image_path, IMREAD_COLOR);
+	string image_path2 = "F:/obj_det_prj/test/ped2.png";
+	auto img2 = imread(image_path2, IMREAD_COLOR);
 
-	ri.createRequest(img);
+	ri.createRequest(img2);
 	ri.submitRequest(false);
 	float* ress2 = (float*)calloc(256, sizeof(float));
 	memcpy(ress2, ri.getResults(), 256);
 
-	cout << cosineSimilarity(ress1, ress2, 256) << endl;
+
+	auto k1 = ri.doEverything(img1);
+	auto k2 = ri.doEverything(img2);
+
+	cout << cosineSimilarity(k1, k2) << endl;
+	//cout << cosineSimilarity(ress1, ress2) << endl;
 
 	cout << "test";//
 	

@@ -9,7 +9,9 @@
 
 class Reidentification_results{};
 
-float cosineSimilarity(const float* , const float* , size_t );
+float cosineSimilarity(const float* , const float* , size_t = 256);
+
+float cosineSimilarity(std::vector<float>&, std::vector<float>&, size_t = 256);
 
 class ReidentificationNet {
 private:
@@ -48,6 +50,8 @@ public:
     void createRequest(const cv::Mat &);
 
     void submitRequest(bool isAsync);
+
+    std::vector<float> doEverything(const cv::Mat&);
 
     const float* getResults();
 };
