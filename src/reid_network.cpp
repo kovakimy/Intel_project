@@ -134,14 +134,13 @@ void ReidentificationNet::submitRequest(bool isAsync) {
 	};
 }
 const float* ReidentificationNet::getResults() {
-		//8) Go over the output blobs and process the results.
-		Blob::Ptr output = request.GetBlob(outputName);
-		using myBlobType = PrecisionTrait<Precision::FP16>::value_type;
-	 //	TBlob<myBlobType>& tblob = dynamic_cast<TBlob<myBlobType>&>(*output);
-	    auto const memLocker = output->cbuffer(); // use const memory locker
-	 // output_buffer is valid as long as the lifetime of memLocker
-		const float* output_buffer = memLocker.as<const float*>();
-		return output_buffer;
+	//8) Go over the output blobs and process the results.
+	Blob::Ptr output = request.GetBlob(outputName);
+	using myBlobType = PrecisionTrait<Precision::FP16>::value_type;	
+	auto const memLocker = output->cbuffer(); // use const memory locker
+	// output_buffer is valid as long as the lifetime of memLocker
+	const float* output_buffer = memLocker.as<const float*>();
+	return output_buffer;
 	};
 
 std::vector<float> ReidentificationNet::doEverything(const cv::Mat& picPart) {
