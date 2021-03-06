@@ -1,4 +1,4 @@
-#include "LineCrossingDetection.hpp"
+#include "../include/LineCrossingDetection.hpp"
 
 LineCrossingDetection::LineCrossingDetection(std::vector<BoundaryLine>& boundaryLines)
 	: boundaryLines(boundaryLines) { };

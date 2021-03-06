@@ -1,6 +1,29 @@
 #include "../include/detector.hpp"
-#include <samples/ocv_common.hpp>
+//#include <samples/ocv_common.hpp>
 #include "../include/reid_network.hpp"
+
+static InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat)
+{
+    size_t channels = mat.channels();
+    size_t height = mat.size().height;
+    size_t width = mat.size().width;
+
+    size_t strideH = mat.step.buf[0];
+    size_t strideW = mat.step.buf[1];
+
+    bool is_dense =
+        strideW == channels &&
+        strideH == channels * width;
+
+    if (!is_dense) THROW_IE_EXCEPTION
+        << "Doesn't support conversion from not dense cv::Mat";
+
+    InferenceEngine::TensorDesc tDesc(InferenceEngine::Precision::U8,
+        { 1, channels, height, width },
+        InferenceEngine::Layout::NHWC);
+
+    return InferenceEngine::make_shared_blob<uint8_t>(tDesc, mat.data);
+};
 
 Detector::Detector(std::string &modelPath, std::string &configPath) : modelPath(modelPath), configPath(configPath)
 {

@@ -1,4 +1,3 @@
-//#include "F:\obj_det_prj\include\reid_network.hpp"
 #include "../include/reid_network.hpp"
 //#include <samples/ocv_common.hpp>
 
@@ -33,7 +32,7 @@ static InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat)
 
 	return InferenceEngine::make_shared_blob<uint8_t>(tDesc, mat.data);
 };
-
+/* WAS REPLACED INTO ObjectTracker, will be removed soon
 float cosineSimilarity(const float* A, const float* B, size_t size) {
 	float res = 0;
 	float sumA2 = 0;
@@ -61,7 +60,7 @@ float cosineSimilarity(std::vector<float>& A, std::vector<float>& B, size_t size
 	res = sumAB / (sqrt(sumA2) * sqrt(sumB2));
 	return res;
 };
-
+*/
 
 ReidentificationNet::ReidentificationNet(const string& _model_xml, const string& _model_bin,
 	const Core& _ie) :

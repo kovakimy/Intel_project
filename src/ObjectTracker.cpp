@@ -1,5 +1,7 @@
-#include "ObjectTracker.hpp"
+#include "../include/ObjectTracker.hpp"
 
+using namespace std;
+using namespace cv;
 
 // functions
 
@@ -81,9 +83,9 @@ vector<T> HungarianAlgorithm(const vector<vector<T>>& g)
 // =========== class ObjectTracker =========== 
 
 ObjectTracker::ObjectTracker(float not_found_segment_cost,
-	float not_found_object_cost) {
-	E_t = not_found_segment_cost;
-	E_s = not_found_object_cost;
+	float not_found_object_cost):
+		E_t(not_found_segment_cost), E_s(not_found_object_cost){
+
 }
 
 /*vector<int> ObjectTracker::SetStartObjects(vector<Object> objects) {
@@ -96,11 +98,11 @@ ObjectTracker::ObjectTracker(float not_found_segment_cost,
 }*/
 
 vector<Object> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Point, Point>> &segments) {
-	Predict();
+	//Predict();
 	vector<Point> segments_centers;
+	/*
 	for (auto& seg : segments)
-
-	/*{
+	{
 		double x = (seg.pos[0].x + seg.pos[1].x) / 2;
 		double y = (seg.pos[0].y + seg.pos[1].y) / 2;
 		segments_centers.push_back(Point(x, y));
@@ -111,7 +113,6 @@ vector<Object> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Poi
 	int item = 0;
 	vector<vector<float>> matrix(size + 1, vector<float>(size + 1));
 	vector<float> combination(size + 1);
-
 	// Creating matrix for assignment algorithm
 	for (int i = 1; i <= current_objects.size(); i++) {
 		for (int j = 1; j <= segments_centers.size(); j++) {
@@ -158,7 +159,7 @@ vector<Object> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Poi
 		float objID = combination[i], segID = i;
 
 		// if found object for segment
-		if (get_Euclidean_dist(current_objects[objID], segments[segID]) < similarityThreshold)
+		if (cosineSimilarity(current_objects[objID].feature, segments[segID].feature) >= similarityThreshold)
 		{
 			prev_objects[objID] = current_objects[objID];
 			current_objects[objID] = segments[segID];
@@ -197,5 +198,5 @@ vector<Object> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Poi
 	{
 		current_objects.erase(current_objects.begin() + ind);
 	}
-
+	return current_objects;
 }
