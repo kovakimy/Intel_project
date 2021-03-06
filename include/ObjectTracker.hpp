@@ -45,5 +45,5 @@ private:
 public:
 	ObjectTracker(double not_found_segment_cost, double not_found_object_cost);
 	vector<int> SetStartObjects(vector<Object> objects_centers);
-	vector<int> Track(vector<Object>& segments);
+	vector<Object> Track(vector<Object>& segments);
 };

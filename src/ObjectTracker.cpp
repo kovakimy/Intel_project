@@ -3,27 +3,20 @@
 
 // functions
 
-double get_Euclidean_dist(const Object &object,const Object &segment) {
-	return sqrt(pow((object.pos[0].x + object.pos[1].x) / 2 - (segment.pos[0].x + segment.pos[1].x), 2.)
-			  + pow((object.pos[0].y + object.pos[1].y) / 2 - (segment.pos[0].y + segment.pos[1].y), 2.));
-}
-
-double get_cosine_dist(const Object& object, const Object& segment) {
-	int obj_x_center = (object.pos[0].x + object.pos[1].x) / 2;
-	int obj_y_center = (object.pos[0].y + object.pos[1].y) / 2;
-	int seg_x_center = (segment.pos[0].x + segment.pos[1].x) / 2;
-	int seg_y_center = (segment.pos[0].y + segment.pos[1].y) / 2;
-
-	double u_norm = sqrt(pow(obj_x_center, 2.) + pow(obj_y_center, 2.));
-	double v_norm = sqrt(pow((segment.pos[0].x + segment.pos[1].x) / 2, 2.) + pow((segment.pos[0].y + segment.pos[1].y) / 2, 2.));
-	if (u_norm * v_norm == 0) {
-		return 0;
+float cosineSimilarity(std::vector<float>& A, std::vector<float>& B) {
+	size_t size = A.size();
+	float res = 0;
+	float sumA2 = 0;
+	float sumB2 = 0;
+	float sumAB = 0;
+	for (size_t i = 0; i < size; ++i) {
+		sumAB += A[i] * B[i];
+		sumA2 += A[i] * A[i];
+		sumB2 += B[i] * B[i];
 	}
-
-	double u_x_v = obj_x_center * seg_x_center + obj_y_center * seg_y_center;
-
-	return 1 - u_x_v / (u_norm * v_norm);
-}
+	res = sumAB / (sqrt(sumA2) * sqrt(sumB2));
+	return res;
+};
 
 template<class T>
 vector<T> HungarianAlgorithm(const vector<vector<T>>& g)
@@ -86,9 +79,6 @@ vector<T> HungarianAlgorithm(const vector<vector<T>>& g)
 }
 
 // =========== class ObjectTracker =========== 
-void ObjectTracker::Predict() {
-
-}
 
 ObjectTracker::ObjectTracker(double not_found_segment_cost,
 	double not_found_object_cost) {
@@ -96,24 +86,26 @@ ObjectTracker::ObjectTracker(double not_found_segment_cost,
 	E_s = not_found_object_cost;
 }
 
-vector<int> ObjectTracker::SetStartObjects(vector<Object> objects) {
+/*vector<int> ObjectTracker::SetStartObjects(vector<Object> objects) {
 	current_objects = objects;
 	vector<int> objects_ids;
 	for (auto& item : current_objects) {
 		objects_ids.push_back(next_id);
 	}
 	return objects_ids;
-}
+}*/
 
-vector<int> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Point, Point>> &segments) {
+vector<Object> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Point, Point>> &segments) {
 	Predict();
 	vector<Point> segments_centers;
 	for (auto& seg : segments)
-	{
+
+	/*{
 		double x = (seg.pos[0].x + seg.pos[1].x) / 2;
 		double y = (seg.pos[0].y + seg.pos[1].y) / 2;
 		segments_centers.push_back(Point(x, y));
-	}
+	}*/
+
 	int max_item = 0;
 	int size = current_objects.size() + segments_centers.size();
 	int item = 0;
@@ -123,7 +115,7 @@ vector<int> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Point,
 	// Creating matrix for assignment algorithm
 	for (int i = 1; i <= current_objects.size(); i++) {
 		for (int j = 1; j <= segments_centers.size(); j++) {
-			item = get_Euclidean_dist(current_objects[i], segments[j]);
+			item = cosineSimilarity(current_objects[i].feature, segments[j].feature);
 			max_item = max(max_item, item);
 			matrix[i][j] = item;
 		}
@@ -169,11 +161,16 @@ vector<int> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Point,
 		if (get_Euclidean_dist(current_objects[objID], segments[segID]) < similarityThreshold)
 		{
 			prev_objects[objID] = current_objects[objID];
+			current_objects[objID] = segments[segID];
+			current_objects[objID].id = prev_objects[objID].id;
+			current_objects[objID].trajectory.push_back(segments_centers[segID]);
+
+			/*
 			current_objects[objID].pos[0].x = segments[segID].pos[0].x;
 			current_objects[objID].pos[0].y = segments[segID].pos[0].y;
 			current_objects[objID].pos[1].x = segments[segID].pos[1].x;
 			current_objects[objID].pos[1].y = segments[segID].pos[1].y;
-			current_objects[objID].trajectory.push_back(segments_centers[segID]);
+			*/
 		}
 		
 		// if not found any segment for ñurrent object :
@@ -189,7 +186,7 @@ vector<int> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Point,
 		// if not found any segment for ñurrent segment (new object on the picture):
 		else if (matrix[objID][segID] == E_s)
 		{
-			Object new_obj = Object(segments[segID].pos, 'feature', next_id);
+			Object new_obj = Object(segments[segID].pos, segments[segID].feature, next_id);
 			next_id++;
 			current_objects.push_back(new_obj);
 			//segments_centers[segID].obj = &current_objects.back();
