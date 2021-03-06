@@ -80,8 +80,8 @@ vector<T> HungarianAlgorithm(const vector<vector<T>>& g)
 
 // =========== class ObjectTracker =========== 
 
-ObjectTracker::ObjectTracker(double not_found_segment_cost,
-	double not_found_object_cost) {
+ObjectTracker::ObjectTracker(float not_found_segment_cost,
+	float not_found_object_cost) {
 	E_t = not_found_segment_cost;
 	E_s = not_found_object_cost;
 }
@@ -109,8 +109,8 @@ vector<Object> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Poi
 	int max_item = 0;
 	int size = current_objects.size() + segments_centers.size();
 	int item = 0;
-	vector<vector<double>> matrix(size + 1, vector<double>(size + 1));
-	vector<double> combination(size + 1);
+	vector<vector<float>> matrix(size + 1, vector<float>(size + 1));
+	vector<float> combination(size + 1);
 
 	// Creating matrix for assignment algorithm
 	for (int i = 1; i <= current_objects.size(); i++) {
@@ -155,7 +155,7 @@ vector<Object> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Poi
 
 	for (int i = 0; i < combination.size(); ++i)
 	{
-		double objID = combination[i], segID = i;
+		float objID = combination[i], segID = i;
 
 		// if found object for segment
 		if (get_Euclidean_dist(current_objects[objID], segments[segID]) < similarityThreshold)

@@ -34,16 +34,16 @@ public:
 
 class ObjectTracker {
 private:
-	double E_t;
-	double E_s;
+	float E_t;
+	float E_s;
 	int next_id = 0;
 	int max_not_found_time = 5;
-	double similarityThreshold = 0.4;
+	float similarityThreshold = 0.4;
 	vector<Object> current_objects;
 	vector<Object> prev_objects;
 	void Predict();
 public:
-	ObjectTracker(double not_found_segment_cost, double not_found_object_cost);
+	ObjectTracker(float not_found_segment_cost, float not_found_object_cost);
 	vector<int> SetStartObjects(vector<Object> objects_centers);
 	vector<Object> Track(vector<Object>& segments);
 };
