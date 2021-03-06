@@ -1,4 +1,5 @@
-#include "F:\obj_det_prj\include\reid_network.hpp"
+//#include "F:\obj_det_prj\include\reid_network.hpp"
+#include "../include/reid_network.hpp"
 //#include <samples/ocv_common.hpp>
 
 #include <vector>

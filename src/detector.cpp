@@ -1,5 +1,6 @@
 #include "../include/detector.hpp"
 #include <samples/ocv_common.hpp>
+#include "../include/reid_network.hpp"
 
 Detector::Detector(std::string &modelPath, std::string &configPath) : modelPath(modelPath), configPath(configPath)
 {

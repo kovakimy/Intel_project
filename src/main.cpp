@@ -1,5 +1,6 @@
 #include <iostream>
 #include "../include/detector.hpp"
+#include "../include/ObjectTracker.hpp"
 #include "../include/reid_network.hpp"
 #include "../include/LineCrossingDetection.hpp"
 #include "../include/AreaIntrusionDetection.hpp"
@@ -90,6 +91,9 @@ int main()
     cv::VideoWriter out("C:/project/build/intel64/Release/out.avi",
     cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
+	ObjectTracker  NewTracker(FLT_MAX, FLT_MAX);
+
+
     std::cout << "Progress bar..." << std::endl;
     while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
     {
@@ -104,6 +108,9 @@ int main()
 		std::vector<Object> Objects;
 		Objects = turnToObject(detections, frame, FLAGS_mReidentification, FLAGS_cReidentification, ie);
 		//tracking
+		std::vector<Object> NewObjects;
+		
+		NewObjects=NewTracker.Track(Objects);
 
 
         result = draw_bbox(frame, detections);
