@@ -75,8 +75,11 @@ std::vector<DetectionObject> Detector::getDetections(cv::Mat &image)
         const double y0     = std::min(std::max(0.0f, data_[start_pos + 4]), 1.0f) * height_;
         const double x1     = std::min(std::max(0.0f, data_[start_pos + 5]), 1.0f) * width_;
         const double y1     = std::min(std::max(0.0f, data_[start_pos + 6]), 1.0f) * height_;
-        DetectionObject det(classID, score, x0, y0, x1, y1);
-        detectedObjects.push_back(det);
+		if (score > 0.75)
+		{
+            DetectionObject det(classID, score, x0, y0, x1, y1);
+            detectedObjects.push_back(det);
+		}
     }
     return detectedObjects;
 }
