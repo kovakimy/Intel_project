@@ -14,26 +14,25 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 
-using namespace cv;
 
 struct Object {
-	explicit Object(std::vector<Point>& pos, std::vector<float>& feature, int id = -1);
+	explicit Object(std::vector<cv::Point>& pos, std::vector<float>& feature, int id = -1);
 
-	std::vector<Point> pos;
+	std::vector<cv::Point> pos;
 	std::vector<float> feature;
 	int id;
-	std::vector<Point> trajectory;
+	std::vector<cv::Point> trajectory;
 	std::chrono::time_point<std::chrono::steady_clock> time;
 };
 
 struct BoundaryLine {
-	explicit BoundaryLine(Point& p0, Point& p1);
+	explicit BoundaryLine(cv::Point& p0, cv::Point& p1);
 
-	Point p0;
-	Point p1;
-	Scalar color;
+	cv::Point p0;
+	cv::Point p1;
+	cv::Scalar color;
 	int lineThinkness;
-	Scalar textColor;
+	cv::Scalar textColor;
 	int textSize;
 	int textThinkness;
 	int count1;
@@ -41,16 +40,16 @@ struct BoundaryLine {
 };
 
 struct Area {
-	explicit Area(std::vector<Point>& contour);
+	explicit Area(std::vector<cv::Point>& contour);
 
-	std::vector<Point> contour;
+	std::vector<cv::Point> contour;
 	size_t count;
-	Scalar color;
+	cv::Scalar color;
 };
 
-inline Point vectorize(const Point& p1, const Point& p2);
-inline bool onSegment(const Point& p1, const Point& p2, const Point& p3);
-inline int direction(const Point& p1, const Point& p2, const Point& p3);
-bool segmentsIntersect(const Point& p1, const Point& p2, const Point& p3, const Point& p4);
+inline cv::Point vectorize(const cv::Point& p1, const cv::Point& p2);
+inline bool onSegment(const cv::Point& p1, const cv::Point& p2, const cv::Point& p3);
+inline int direction(const cv::Point& p1, const cv::Point& p2, const cv::Point& p3);
+bool segmentsIntersect(const cv::Point& p1, const cv::Point& p2, const cv::Point& p3, const cv::Point& p4);
 
-double computeAngle(const Point& p1, const Point& p2, const Point& p3, const Point& p4);
+double computeAngle(const cv::Point& p1, const cv::Point& p2, const cv::Point& p3, const cv::Point& p4);

@@ -8,8 +8,8 @@ void LineCrossingDetection::checkLineCrosses(std::vector<Object>& objects) {
 		size_t trajLen = object.trajectory.size();
 		if (trajLen < 2) continue;
 
-		Point p0_traj = object.trajectory[trajLen - 1];
-		Point p1_traj = object.trajectory[trajLen - 2];
+		cv::Point p0_traj = object.trajectory[trajLen - 1];
+		cv::Point p1_traj = object.trajectory[trajLen - 2];
 		
 		for (auto& bLine : boundaryLines) {
 			if (segmentsIntersect(p0_traj, p1_traj, bLine.p0, bLine.p1))
@@ -20,10 +20,10 @@ void LineCrossingDetection::checkLineCrosses(std::vector<Object>& objects) {
 	}
 }
 
-void LineCrossingDetection::drawBoundaryLines(Mat& img) const {
+void LineCrossingDetection::drawBoundaryLines(cv::Mat& img) const {
 	for (auto& bLine : boundaryLines) {
 		line(img, bLine.p0, bLine.p1, bLine.color, bLine.lineThinkness);
-		putText(img, std::to_string(bLine.count1), bLine.p0, FONT_HERSHEY_PLAIN, bLine.textSize, bLine.textColor, bLine.lineThinkness);
-		putText(img, std::to_string(bLine.count2), bLine.p1, FONT_HERSHEY_PLAIN, bLine.textSize, bLine.textColor, bLine.lineThinkness);
+		putText(img, std::to_string(bLine.count1), bLine.p0, cv::FONT_HERSHEY_PLAIN, bLine.textSize, bLine.textColor, bLine.lineThinkness);
+		putText(img, std::to_string(bLine.count2), bLine.p1, cv::FONT_HERSHEY_PLAIN, bLine.textSize, bLine.textColor, bLine.lineThinkness);
 	}
 }

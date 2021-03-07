@@ -1,5 +1,7 @@
 #include "../include/Context.hpp"
 
+using namespace cv;
+
 Object::Object(std::vector<Point>& pos, std::vector<float>& feature, int id)
 	: pos(pos), feature(feature), id(id), time(std::chrono::steady_clock::now()) { };
 

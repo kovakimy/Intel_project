@@ -158,8 +158,17 @@ vector<Object> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Poi
 	{
 		float objID = combination[i], segID = i;
 
+		if (matrix[objID][segID] == E_s)
+		{
+			Object new_obj = Object(segments[segID].pos, segments[segID].feature, next_id);
+			next_id++;
+			current_objects.push_back(new_obj);
+			//segments_centers[segID].obj = &current_objects.back();
+		}
+
 		// if found object for segment
-		if (cosineSimilarity(current_objects[objID].feature, segments[segID].feature) >= similarityThreshold)
+		// Shall we use !current_objects.empty() && ... ?
+		 if (cosineSimilarity(current_objects[objID].feature, segments[segID].feature) >= similarityThreshold)
 		{
 			prev_objects[objID] = current_objects[objID];
 			current_objects[objID] = segments[segID];
@@ -173,7 +182,7 @@ vector<Object> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Poi
 			current_objects[objID].pos[1].y = segments[segID].pos[1].y;
 			*/
 		}
-		
+
 		// if not found any segment for ñurrent object :
 		else if (matrix[objID][segID] == E_t)
 		{
@@ -183,16 +192,16 @@ vector<Object> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Poi
 				break;
 			}
 		}
-		
-		// if not found any segment for ñurrent segment (new object on the picture):
-		else if (matrix[objID][segID] == E_s)
-		{
-			Object new_obj = Object(segments[segID].pos, segments[segID].feature, next_id);
-			next_id++;
-			current_objects.push_back(new_obj);
-			//segments_centers[segID].obj = &current_objects.back();
-		}
+		 else if (matrix[objID][segID] == E_s)
+		 {
+			 Object new_obj = Object(segments[segID].pos, segments[segID].feature, next_id);
+			 next_id++;
+			 current_objects.push_back(new_obj);
+			 //segments_centers[segID].obj = &current_objects.back();
+		 }
 	}
+		// if not found any segment for ñurrent segment (new object on the picture):
+
 
 	for (auto& ind : objects_to_del)
 	{

@@ -9,5 +9,5 @@ private:
 public:
 	explicit LineCrossingDetection(std::vector<BoundaryLine>& boundaryLines);
 	void checkLineCrosses(std::vector<Object>& objects);
-	void drawBoundaryLines(Mat& image) const;
+	void drawBoundaryLines(cv::Mat& image) const;
 };

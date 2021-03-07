@@ -29,32 +29,23 @@ cv::Mat draw_bbox(cv::Mat &frame, std::vector<DetectionObject>& objects)
 
 cv::Mat crop(cv::Mat& img, int xmin, int ymin, int xmax, int ymax)
 {
-
 	cv::Rect roi;
-	//roi.x = (xmin + xmax)/2;
     roi.x = xmin;
-	//roi.y = (ymin + ymax) / 2;
-    roi.y = ymin;
-	//roi.width = img.size().width - (xmin + xmax);
-    roi.width = xmax - xmin;
-//	roi.height = img.size().height - (ymin + ymax);
-    roi.height = ymax - ymin;
+    roi.y = ymax;
+    roi.width = abs(xmax - xmin);
+    roi.height = abs(ymin - ymax);
 
 	cv::Mat crop = img(roi);
 	return crop;
-
-
 }
 
-std::vector<Object>& turnToObject(std::vector<DetectionObject>& detections, cv::Mat& frame, std::string& FLAGS_mReidentification,
-    std::string& FLAGS_cReidentification, InferenceEngine::Core ie)
+std::vector<Object>& turnToObject(std::vector<DetectionObject>& detections, cv::Mat& frame, ReidentificationNet& ri)
 {
-	ReidentificationNet ri(FLAGS_mReidentification, FLAGS_cReidentification, ie);
 	std::vector<Object> Objects;//вектор объектов из части areas_and_blines
 	for (auto detect : detections)
 	{
 		cv::Mat croped = crop(frame, detect.xmin, detect.ymin, detect.xmax, detect.ymax);
-		std::vector< float> features = ri.doEverything(croped);//метод Антона Коркунова
+		std::vector<float> features = ri.doEverything(croped);//метод Антона Коркунова
 		std::vector<cv::Point> position; //вектор координат сначала координата min, вторая max
 		cv::Point tmp1(detect.xmin, detect.ymin);
 		cv::Point tmp2(detect.xmax, detect.ymax);
@@ -71,6 +62,7 @@ std::vector<Object>& turnToObject(std::vector<DetectionObject>& detections, cv::
 int main()
 {
     InferenceEngine::Core ie;
+    InferenceEngine::Core reid_ie;
     std::string FLAGS_m = "../models/pedestrian-detection-adas-0002.xml";
     std::string FLAGS_c = "../models/pedestrian-detection-adas-0002.bin";
     std::string FLAGS_v = "../media/people-detection.mp4";
@@ -78,6 +70,7 @@ int main()
 	std::string FLAGS_cReidentification="../models/person-reidentification-retail-0286.bin";
 
     Detector detector(FLAGS_m, FLAGS_c);
+    ReidentificationNet ri(FLAGS_mReidentification, FLAGS_cReidentification, ie);
 
     int frame_counter = 1;
     cv::Mat frame;
@@ -90,7 +83,7 @@ int main()
     cv::VideoWriter out("../media/out.avi",
     cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
-	ObjectTracker  NewTracker(FLT_MAX, FLT_MAX);
+	ObjectTracker NewTracker(FLT_MAX, FLT_MAX);
 
 	std::vector<cv::Point> contour = { cv::Point(200, 200), cv::Point(500, 180), cv::Point(600, 400), cv::Point(300, 300), cv::Point(100, 360) };
 	std::vector<Area> areas = { Area(contour) };
@@ -111,7 +104,7 @@ int main()
         }
         std::vector<DetectionObject> detections = detector.getDetections(frame);
 		std::vector<Object> Objects;
-		Objects = turnToObject(detections, frame, FLAGS_mReidentification, FLAGS_cReidentification, ie);
+		Objects = turnToObject(detections, frame, ri);
 		//tracking
 		std::vector<Object> NewObjects;
 
@@ -123,7 +116,6 @@ int main()
 
 		bLinesDetectorAndDrawer.checkLineCrosses(NewObjects);
 		bLinesDetectorAndDrawer.drawBoundaryLines(frame);
-
 
         result = draw_bbox(frame, detections);
         out.write(result);
