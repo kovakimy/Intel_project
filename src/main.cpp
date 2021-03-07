@@ -27,14 +27,18 @@ cv::Mat draw_bbox(cv::Mat &frame, std::vector<DetectionObject>& objects)
     return frame;
 }
 
-cv::Mat& crop(cv::Mat& img, int xmin, int ymin, int xmax, int ymax)
+cv::Mat crop(cv::Mat& img, int xmin, int ymin, int xmax, int ymax)
 {
 
 	cv::Rect roi;
-	roi.x = (xmin + xmax)/2;
-	roi.y = (ymin + ymax) / 2;
-	roi.width = img.size().width - (xmin + xmax);
-	roi.height = img.size().height - (ymin + ymax);
+	//roi.x = (xmin + xmax)/2;
+    roi.x = xmin;
+	//roi.y = (ymin + ymax) / 2;
+    roi.y = ymin;
+	//roi.width = img.size().width - (xmin + xmax);
+    roi.width = xmax - xmin;
+//	roi.height = img.size().height - (ymin + ymax);
+    roi.height = ymax - ymin;
 
 	cv::Mat crop = img(roi);
 	return crop;
@@ -42,7 +46,8 @@ cv::Mat& crop(cv::Mat& img, int xmin, int ymin, int xmax, int ymax)
 
 }
 
-std::vector<Object>& turnToObject(std::vector<DetectionObject>& detections, cv::Mat& frame, std::string FLAGS_mReidentification, std::string FLAGS_cReidentification, InferenceEngine::Core ie)
+std::vector<Object>& turnToObject(std::vector<DetectionObject>& detections, cv::Mat& frame, std::string& FLAGS_mReidentification,
+    std::string& FLAGS_cReidentification, InferenceEngine::Core ie)
 {
 	ReidentificationNet ri(FLAGS_mReidentification, FLAGS_cReidentification, ie);
 	std::vector<Object> Objects;//вектор объектов из части areas_and_blines
@@ -58,25 +63,19 @@ std::vector<Object>& turnToObject(std::vector<DetectionObject>& detections, cv::
 		Object tmpObject(position, features, -1);
 		Objects.push_back(tmpObject);
 
-
-
-
-
 	}
 	return Objects;
-
 }
-
 
 
 int main()
 {
     InferenceEngine::Core ie;
-    std::string FLAGS_m = "C://object-tracking-line-crossing-area-intrusion//intel//pedestrian-detection-adas-0002//FP16//pedestrian-detection-adas-0002.xml";
-    std::string FLAGS_c = "C://object-tracking-line-crossing-area-intrusion//intel//pedestrian-detection-adas-0002//FP16//pedestrian-detection-adas-0002.bin";
-    std::string FLAGS_v = "C://project//build//intel64//Release//people-detection.mp4";
-	std::string FLAGS_mReidentification="C://object-tracking-line-crossing-area-intrusion//intel//person-reidentification-retail-0286//FP16//person-reidentification-retail-0286.xml";
-	std::string FLAGS_cReidentification="C://object-tracking-line-crossing-area-intrusion//intel//person-reidentification-retail-0286//FP16//person-reidentification-retail-0286.bin";
+    std::string FLAGS_m = "../models/pedestrian-detection-adas-0002.xml";
+    std::string FLAGS_c = "../models/pedestrian-detection-adas-0002.bin";
+    std::string FLAGS_v = "../media/people-detection.mp4";
+	std::string FLAGS_mReidentification="../models/person-reidentification-retail-0286.xml";
+	std::string FLAGS_cReidentification="../models/person-reidentification-retail-0286.bin";
 
     Detector detector(FLAGS_m, FLAGS_c);
 
@@ -88,7 +87,7 @@ int main()
     double frame_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
     double frame_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-    cv::VideoWriter out("C:/project/build/intel64/Release/out.avi",
+    cv::VideoWriter out("../media/out.avi",
     cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
 	ObjectTracker  NewTracker(FLT_MAX, FLT_MAX);
@@ -131,8 +130,6 @@ int main()
         frame_counter++;
         capture >> frame;
     }
-
-
 
     std::cout << std::endl;
     std::cout << "Completed";

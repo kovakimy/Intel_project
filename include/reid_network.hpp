@@ -9,9 +9,6 @@
 
 class Reidentification_results{};
 
-//float cosineSimilarity(const float* , const float* , size_t = 256);
-
-//float cosineSimilarity(std::vector<float>&, std::vector<float>&, size_t = 256);
 
 class ReidentificationNet {
 private:

@@ -1,7 +1,7 @@
 #include "../include/AreaIntrusionDetection.hpp"
 
-AreaIntrusionDetection::AreaIntrusionDetection(std::vector<Area> areas) {
-	this->areas = areas;
+AreaIntrusionDetection::AreaIntrusionDetection(std::vector<Area>& _areas) {
+	areas = _areas;
 };
 
 void AreaIntrusionDetection::checkAreaIntrusion(std::vector<Object>& objs) {

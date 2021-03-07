@@ -32,35 +32,7 @@ static InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat)
 
 	return InferenceEngine::make_shared_blob<uint8_t>(tDesc, mat.data);
 };
-/* WAS REPLACED INTO ObjectTracker, will be removed soon
-float cosineSimilarity(const float* A, const float* B, size_t size) {
-	float res = 0;
-	float sumA2 = 0;
-	float sumB2 = 0;
-	float sumAB = 0;
-	for (size_t i = 0; i < size; ++i) {
-		sumAB += A[i] * B[i];
-		sumA2 += A[i] * A[i];
-		sumB2 += B[i] * B[i];
-	}
-	res = sumAB / (sqrt(sumA2) * sqrt(sumB2));
-	return res;
-};
 
-float cosineSimilarity(std::vector<float>& A, std::vector<float>& B, size_t size) {
-	float res = 0;
-	float sumA2 = 0;
-	float sumB2 = 0;
-	float sumAB = 0;
-	for (size_t i = 0; i < size; ++i) {
-		sumAB += A[i] * B[i];
-		sumA2 += A[i] * A[i];
-		sumB2 += B[i] * B[i];
-	}
-	res = sumAB / (sqrt(sumA2) * sqrt(sumB2));
-	return res;
-};
-*/
 
 ReidentificationNet::ReidentificationNet(const string& _model_xml, const string& _model_bin,
 	const Core& _ie) :
@@ -115,9 +87,7 @@ ICNNNetwork::InputShapes ReidentificationNet::getInputShape() {
 void ReidentificationNet::createRequest(const cv::Mat &pic_part){
 	//5) Create an infer request
 	request = executable_network.CreateInferRequest();
-	/*
-	6) Prepare input
-	*/
+	//6) Prepare input
 	Blob::Ptr imgBlob = wrapMat2Blob(pic_part);
     request.SetBlob(inputName, imgBlob);
 
@@ -134,14 +104,15 @@ void ReidentificationNet::submitRequest(bool isAsync) {
 	};
 }
 const float* ReidentificationNet::getResults() {
-		//8) Go over the output blobs and process the results.
-		Blob::Ptr output = request.GetBlob(outputName);
-		using myBlobType = PrecisionTrait<Precision::FP16>::value_type;
-	 //	TBlob<myBlobType>& tblob = dynamic_cast<TBlob<myBlobType>&>(*output);
-	    auto const memLocker = output->cbuffer(); // use const memory locker
-	 // output_buffer is valid as long as the lifetime of memLocker
-		const float* output_buffer = memLocker.as<const float*>();
-		return output_buffer;
+
+   //8) Go over the output blobs and process the results.
+	Blob::Ptr output = request.GetBlob(outputName);
+	using myBlobType = PrecisionTrait<Precision::FP16>::value_type;
+  //TBlob<myBlobType>& tblob = dynamic_cast<TBlob<myBlobType>&>(*output);
+	auto const memLocker = output->cbuffer(); // use const memory locker
+  //output_buffer is valid as long as the lifetime of memLocker
+	const float* output_buffer = memLocker.as<const float*>();
+	return output_buffer;
 	};
 
 std::vector<float> ReidentificationNet::doEverything(const cv::Mat& picPart) {
