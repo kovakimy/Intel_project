@@ -158,14 +158,6 @@ vector<Object> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Poi
 	{
 		float objID = combination[i], segID = i;
 
-		if (matrix[objID][segID] == E_s)
-		{
-			Object new_obj = Object(segments[segID].pos, segments[segID].feature, next_id);
-			next_id++;
-			current_objects.push_back(new_obj);
-			//segments_centers[segID].obj = &current_objects.back();
-		}
-
 		// if found object for segment
 		// Shall we use !current_objects.empty() && ... ?
 		 if (cosineSimilarity(current_objects[objID].feature, segments[segID].feature) >= similarityThreshold)
