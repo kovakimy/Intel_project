@@ -93,6 +93,12 @@ int main()
 
 	ObjectTracker  NewTracker(FLT_MAX, FLT_MAX);
 
+	std::vector<cv::Point> contour = { cv::Point(200, 200), cv::Point(500, 180), cv::Point(600, 400), cv::Point(300, 300), cv::Point(100, 360) };
+	std::vector<Area> areas = { Area(contour) };
+	AreaIntrusionDetection areaDetectorAndDrawer(areas);
+
+	std::vector<BoundaryLine> boundaryLines = { BoundaryLine(cv::Point(300, 40), cv::Point(200,400)), BoundaryLine(cv::Point(440, 40), cv::Point(700,400)) };
+	LineCrossingDetection bLinesDetectorAndDrawer(boundaryLines);
 
     std::cout << "Progress bar..." << std::endl;
     while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
@@ -109,8 +115,15 @@ int main()
 		Objects = turnToObject(detections, frame, FLAGS_mReidentification, FLAGS_cReidentification, ie);
 		//tracking
 		std::vector<Object> NewObjects;
-		
+
 		NewObjects=NewTracker.Track(Objects);
+
+		//drawing
+		areaDetectorAndDrawer.checkAreaIntrusion(NewObjects);
+		areaDetectorAndDrawer.drawAreas(frame);
+
+		bLinesDetectorAndDrawer.checkLineCrosses(NewObjects);
+		bLinesDetectorAndDrawer.drawBoundaryLines(frame);
 
 
         result = draw_bbox(frame, detections);

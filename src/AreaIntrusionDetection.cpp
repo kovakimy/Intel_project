@@ -4,7 +4,7 @@ AreaIntrusionDetection::AreaIntrusionDetection(std::vector<Area> areas) {
 	this->areas = areas;
 };
 
-void AreaIntrusionDetection::checkAreaIntrusion(std::vector<Object> objs) {
+void AreaIntrusionDetection::checkAreaIntrusion(std::vector<Object>& objs) {
 	for (auto& area : areas) {
 		area.count = 0;
 		for (auto& obj : objs) {
