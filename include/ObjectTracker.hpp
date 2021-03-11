@@ -11,6 +11,7 @@
 
 class ObjectTracker {
 private:
+	bool is_first;
 	float E_t;
 	float E_s;
 	int next_id = 0;

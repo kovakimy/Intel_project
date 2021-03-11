@@ -1,4 +1,4 @@
-#include "../include/ObjectTracker.hpp"
+ï»¿#include "../include/ObjectTracker.hpp"
 
 using namespace std;
 using namespace cv;
@@ -21,13 +21,30 @@ float cosineSimilarity(std::vector<float>& A, std::vector<float>& B) {
 };
 
 template<class T>
-vector<T> HungarianAlgorithm(const vector<vector<T>>& g)
+vector<int> HungarianAlgorithm(vector<vector<T>> g)
 {
 	int n = g.size() - 1;
 	vector<int> par(n + 1, 0);
 	vector<int> way(n + 1, 0);
 	vector<T> u(n + 1, 0);
 	vector<T> v(n + 1, 0);
+
+	for (int i = 1; i <= n; ++i)
+	{
+		T max_in_row = 0;
+		for (int j = 1; j <= n; ++j)
+		{
+			if (max_in_row < g[i][j])
+				max_in_row = g[i][j];
+		}
+		for (int j = 1; j <= n; ++j)
+		{
+			g[i][j] -= max_in_row;
+			g[i][j] *= -1;
+		}
+
+	}
+
 	for (int i = 1; i < n + 1; i++)
 	{
 		par[0] = i;
@@ -74,7 +91,7 @@ vector<T> HungarianAlgorithm(const vector<vector<T>>& g)
 		} while (prev_col != 0);
 	}
 	v[0] *= -1; // total res
-	vector<T> res(n + 1, 0);
+	vector<int> res(n + 1, 0);
 	for (int j = 1; j <= n; ++j)
 		res[par[j]] = j;
 	return res;
@@ -83,8 +100,8 @@ vector<T> HungarianAlgorithm(const vector<vector<T>>& g)
 // =========== class ObjectTracker =========== 
 
 ObjectTracker::ObjectTracker(float not_found_segment_cost,
-	float not_found_object_cost):
-		E_t(not_found_segment_cost), E_s(not_found_object_cost){
+	float not_found_object_cost) :
+	E_t(not_found_segment_cost), E_s(not_found_object_cost) {
 
 }
 
@@ -97,107 +114,123 @@ ObjectTracker::ObjectTracker(float not_found_segment_cost,
 	return objects_ids;
 }*/
 
-vector<Object> ObjectTracker::Track(vector<Object> &segments){//(vector<pair<Point, Point>> &segments) {
-	//Predict();
-	vector<Point> segments_centers;
-	/*
-	for (auto& seg : segments)
+vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Point, Point>> &segments) {
+	if (current_objects.empty())
 	{
-		double x = (seg.pos[0].x + seg.pos[1].x) / 2;
-		double y = (seg.pos[0].y + seg.pos[1].y) / 2;
-		segments_centers.push_back(Point(x, y));
-	}*/
-
-	int max_item = 0;
-	int size = current_objects.size() + segments_centers.size();
-	int item = 0;
-	vector<vector<float>> matrix(size + 1, vector<float>(size + 1));
-	vector<float> combination(size + 1);
-	// Creating matrix for assignment algorithm
-	for (int i = 1; i <= current_objects.size(); i++) {
-		for (int j = 1; j <= segments_centers.size(); j++) {
-			item = cosineSimilarity(current_objects[i].feature, segments[j].feature);
-			max_item = max(max_item, item);
-			matrix[i][j] = item;
+		for (size_t i = 0; i < segments.size(); ++i)
+		{
+			current_objects.push_back(segments[i]);
+			Point center((segments[i].pos[0].x + segments[i].pos[1].x) / 2,
+				(segments[i].pos[0].y + segments[i].pos[1].y) / 2);
+			current_objects[i].trajectory.push_back(center);
 		}
 	}
-	max_item *= 10;
+	else {
+		vector<Point> segments_centers;
+		/*
+		for (auto& seg : segments)
+		{
+			double x = (seg.pos[0].x + seg.pos[1].x) / 2;
+			double y = (seg.pos[0].y + seg.pos[1].y) / 2;
+			segments_centers.push_back(Point(x, y));
+		}*/
 
-	for (int i = 1; i <= current_objects.size(); i++) {
-		for (int j = segments_centers.size() + 1; j <= size; j++) {
-			if (i == j) {
-				matrix[i][j] = E_t;
+		float max_item = 0;
+		int size = current_objects.size() + segments.size();
+		float item = 0;
+		vector<vector<float>> matrix(size + 1, vector<float>(size + 1));
+		vector<int> combination(size + 1);
+		// Creating matrix for assignment algorithm
+		for (int i = 1; i <= current_objects.size(); i++) {
+			for (int j = 1; j <= segments.size(); j++) {
+				item = cosineSimilarity(current_objects[i-1].feature, segments[j-1].feature);
+				max_item = max(max_item, item);
+				matrix[i][j] = item;
 			}
-			else {
+		}
+		max_item *= 10;
+
+		for (int i = 1; i <= current_objects.size(); i++) {
+			for (int j = segments.size() + 1; j <= size; j++) {
+				if (i == (j - segments.size())) {
+					matrix[i][j] = E_t;
+				}
+				else {
+					matrix[i][j] = -max_item;
+				}
+			}
+		}
+
+		for (int i = current_objects.size() + 1; i <= size; i++) {
+			for (int j = 1; j <= segments.size(); j++) {
+				if ((i - current_objects.size()) == j) {
+					matrix[i][j] = E_s;
+				}
+				else {
+					matrix[i][j] = -max_item;
+				}
+			}
+		}
+
+		for (int i = current_objects.size() + 1; i < size; i++) {
+			for (int j = segments.size() + 1; j < size; j++) {
 				matrix[i][j] = max_item;
 			}
 		}
-	}
 
-	for (int i = current_objects.size() + 1; i <= size; i++) {
-		for (int j = 1; j <= segments_centers.size(); j++) {
-			if (i == j) {
-				matrix[i][j] = E_s;
-			}
-			else {
-				matrix[i][j] = max_item;
-			}
-		}
-	}
+		vector<int> objects_to_del;
+		combination = HungarianAlgorithm<float>(matrix);
 
-	for (int i = current_objects.size() + 1; i < size; i++) {
-		for (int j = segments_centers.size() + 1; j < size; j++) {
-			matrix[i][j] = 0;
-		}
-	}
-
-	vector<int> objects_to_del;
-	combination = HungarianAlgorithm(matrix);
-
-	for (int i = 0; i < combination.size(); ++i)
-	{
-		float objID = combination[i], segID = i;
-
-		// if found object for segment
-		// Shall we use !current_objects.empty() && ... ?
-		 if (cosineSimilarity(current_objects[objID].feature, segments[segID].feature) >= similarityThreshold)
+		for (int i = 1; i < combination.size(); ++i)
 		{
-			prev_objects[objID] = current_objects[objID];
-			current_objects[objID] = segments[segID];
-			current_objects[objID].id = prev_objects[objID].id;
-			current_objects[objID].trajectory.push_back(segments_centers[segID]);
+			size_t objID = combination[i] - 1, segID = i - 1;
 
-			/*
-			current_objects[objID].pos[0].x = segments[segID].pos[0].x;
-			current_objects[objID].pos[0].y = segments[segID].pos[0].y;
-			current_objects[objID].pos[1].x = segments[segID].pos[1].x;
-			current_objects[objID].pos[1].y = segments[segID].pos[1].y;
-			*/
-		}
+			// if found object for segment
+			// Shall we use !current_objects.empty() && ... ?
+			//if (cosineSimilarity(current_objects[objID].feature, segments[segID].feature) >= similarityThreshold)
+			//if (matrix[objID][segID] >= similarityThreshold)
 
-		// if not found any segment for ñurrent object :
-		else if (matrix[objID][segID] == E_t)
-		{
-			if (current_objects[objID].time > (std::chrono::steady_clock::now() + 400ms))
+			if (objID < current_objects.size() && (segID < segments.size()))
 			{
-				objects_to_del.push_back(objID);
-				break;
+				current_objects[objID].pos = segments[segID].pos;
+				current_objects[objID].feature = segments[segID].feature;
+				Point center((segments[segID].pos[0].x + segments[segID].pos[1].x) / 2,
+					(segments[segID].pos[0].y + segments[segID].pos[1].y) / 2);
+
+				current_objects[objID].trajectory.push_back(center);
+			}
+
+			// if not found any segment for ï¿½urrent object :
+			else if (segID >= segments.size())
+			{
+				if (matrix[objID][segID] == E_t)
+				{
+					if (current_objects[objID].time > (std::chrono::steady_clock::now() + 400ms))
+					{
+						objects_to_del.push_back(objID);
+						break;
+					}
+				}
+			}
+			else if (objID >= current_objects.size())
+			{
+				if (matrix[objID][segID] == E_s)
+				{
+					Object new_obj = Object(segments[segID].pos, segments[segID].feature, next_id);
+					next_id++;
+					current_objects.push_back(new_obj);
+					//segments_centers[segID].obj = &current_objects.back();
+				}
 			}
 		}
-		 else if (matrix[objID][segID] == E_s)
-		 {
-			 Object new_obj = Object(segments[segID].pos, segments[segID].feature, next_id);
-			 next_id++;
-			 current_objects.push_back(new_obj);
-			 //segments_centers[segID].obj = &current_objects.back();
-		 }
-	}
-		// if not found any segment for ñurrent segment (new object on the picture):
+		// if not found any segment for ï¿½urrent segment (new object on the picture):
 
-
-	for (auto& ind : objects_to_del)
-	{
-		current_objects.erase(current_objects.begin() + ind);
+		std::sort(objects_to_del.begin(), objects_to_del.end());
+		std::reverse(objects_to_del.begin(), objects_to_del.end());
+		for (auto& ind : objects_to_del)
+		{
+			current_objects.erase(current_objects.begin() + ind);
+		}
 	}
 	return current_objects;
 }

@@ -6,6 +6,7 @@
 #include "../include/AreaIntrusionDetection.hpp"
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+
 #define str "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define pd 60
 
@@ -31,15 +32,18 @@ cv::Mat crop(cv::Mat& img, int xmin, int ymin, int xmax, int ymax)
 {
 	cv::Rect roi;
     roi.x = xmin;
-    roi.y = ymax;
-    roi.width = abs(xmax - xmin);
-    roi.height = abs(ymin - ymax);
+    roi.y = ymin;//img.size().height - ymax;
+    roi.width = abs(xmax - xmin)-2;
+    roi.height = ymax - ymin;
 
 	cv::Mat crop = img(roi);
+    //cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);// Create a window for display.
+    //imshow("Display window", crop);
+   // cv::waitKey(0);
 	return crop;
 }
 
-std::vector<Object>& turnToObject(std::vector<DetectionObject>& detections, cv::Mat& frame, ReidentificationNet& ri)
+std::vector<Object> turnToObject(std::vector<DetectionObject>& detections, cv::Mat& frame, ReidentificationNet& ri)
 {
 	std::vector<Object> Objects;//вектор объектов из части areas_and_blines
 	for (auto detect : detections)
@@ -80,16 +84,17 @@ int main()
     double frame_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
     double frame_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-    cv::VideoWriter out("../media/out.avi",
+    cv::VideoWriter out("../media/out1.avi",
     cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
-	ObjectTracker NewTracker(FLT_MAX, FLT_MAX);
+	//ObjectTracker NewTracker(FLT_MAX, FLT_MAX);
+    ObjectTracker NewTracker(0.6, 0.6);
 
 	std::vector<cv::Point> contour = { cv::Point(200, 200), cv::Point(500, 180), cv::Point(600, 400), cv::Point(300, 300), cv::Point(100, 360) };
 	std::vector<Area> areas = { Area(contour) };
 	AreaIntrusionDetection areaDetectorAndDrawer(areas);
 
-	std::vector<BoundaryLine> boundaryLines = { BoundaryLine(cv::Point(300, 40), cv::Point(200,400)), BoundaryLine(cv::Point(440, 40), cv::Point(700,400)) };
+	std::vector<BoundaryLine> boundaryLines = { BoundaryLine(cv::Point(217, 40), cv::Point(50,400)), BoundaryLine(cv::Point(440, 40), cv::Point(700,400)) };
 	LineCrossingDetection bLinesDetectorAndDrawer(boundaryLines);
 
     std::cout << "Progress bar..." << std::endl;
@@ -104,19 +109,23 @@ int main()
         }
         std::vector<DetectionObject> detections = detector.getDetections(frame);
 		std::vector<Object> Objects;
-		Objects = turnToObject(detections, frame, ri);
+        if (detections.size()) {
+            auto k = 6;
+        }
+ 		Objects = turnToObject(detections, frame, ri);
 		//tracking
 		std::vector<Object> NewObjects;
-
+    
 		NewObjects=NewTracker.Track(Objects);
 
 		//drawing
 		areaDetectorAndDrawer.checkAreaIntrusion(NewObjects);
-		areaDetectorAndDrawer.drawAreas(frame);
+	//	areaDetectorAndDrawer.drawAreas(frame);
 
 		bLinesDetectorAndDrawer.checkLineCrosses(NewObjects);
 		bLinesDetectorAndDrawer.drawBoundaryLines(frame);
 
+        areaDetectorAndDrawer.drawAreas(frame);
         result = draw_bbox(frame, detections);
         out.write(result);
         frame_counter++;
