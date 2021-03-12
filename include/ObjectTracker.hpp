@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 #include <time.h>
 #include <opencv2/core/types.hpp>
 #include "../include/Context.hpp"
@@ -11,7 +12,7 @@
 
 class ObjectTracker {
 private:
-	bool is_first;
+	bool is_first = false;
 	float E_t;
 	float E_s;
 	int next_id = 0;

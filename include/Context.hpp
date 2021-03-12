@@ -20,6 +20,7 @@ struct Object {
 
 	std::vector<cv::Point> pos;
 	std::vector<float> feature;
+	int TrackerCounter = 0;
 	int id;
 	std::vector<cv::Point> trajectory;
 	std::chrono::time_point<std::chrono::steady_clock> time;
