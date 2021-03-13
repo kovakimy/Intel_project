@@ -1,6 +1,5 @@
 #include "../include/detector.hpp"
 //#include <samples/ocv_common.hpp>
-#include "../include/reid_network.hpp"
 
 static InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat)
 {

@@ -1,4 +1,4 @@
-#include "../include/reid_network.hpp"
+#include "../include/ReidNetwork.hpp"
 //#include <samples/ocv_common.hpp>
 
 #include <vector>

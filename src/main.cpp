@@ -1,7 +1,7 @@
 #include <iostream>
 #include "../include/detector.hpp"
 #include "../include/ObjectTracker.hpp"
-#include "../include/reid_network.hpp"
+#include "../include/ReidNetwork.hpp"
 #include "../include/LineCrossesAndAreaIntrusionDetection.hpp"
 #include "../include/Drawer.hpp"
 #include <opencv2/imgproc.hpp>
@@ -37,19 +37,18 @@ cv::Mat crop(cv::Mat& img, int xmin, int ymin, int xmax, int ymax) {
 }
 
 std::vector<Object> turnToObject(std::vector<DetectionObject>& detections, cv::Mat& frame, ReidentificationNet& ri) {
-	std::vector<Object> Objects;//вектор объектов из части areas_and_blines
+	std::vector<Object> Objects;//vector of objects from areas_and_blines
 	for (auto detect : detections)
 	{
 		cv::Mat croped = crop(frame, detect.xmin, detect.ymin, detect.xmax, detect.ymax);
-		std::vector<float> features = ri.doEverything(croped);//метод Антона Коркунова
-		std::vector<cv::Point> position; //вектор координат сначала координата min, вторая max
+		std::vector<float> features = ri.doEverything(croped);//common method for the work process of the reid network
+		std::vector<cv::Point> position; //coordinates vector, at first min and after max coordinate
 		cv::Point tmp1(detect.xmin, detect.ymin);
 		cv::Point tmp2(detect.xmax, detect.ymax);
 		position.push_back(tmp1);
 		position.push_back(tmp2);
 		Object tmpObject(position, features, -1);
 		Objects.push_back(tmpObject);
-
 	}
 	return Objects;
 }
@@ -79,7 +78,7 @@ int main() {
 		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
 	//ObjectTracker NewTracker(FLT_MAX, FLT_MAX);
-	ObjectTracker NewTracker(0.6, 0.6);
+	ObjectTracker NewTracker(0.75, 0.75);
 	auto solver = LineCrossesAndAreaIntrusionDetection();
 	auto drawer = Drawer();
 
@@ -101,9 +100,6 @@ int main() {
 		std::vector<DetectionObject> detections = detector.getDetections(frame);
 		std::vector<Object> objects;
 
-		if (detections.size()) {
-			auto k = 6;
-		}
 		objects = turnToObject(detections, frame, ri);
 		//tracking
 

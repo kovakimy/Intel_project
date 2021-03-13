@@ -5,7 +5,7 @@ using namespace cv;
 
 // functions
 
-float cosineSimilarity(std::vector<float>& A, std::vector<float>& B) {
+static float cosineSimilarity(const std::vector<float>& A, const std::vector<float>& B) {
 	size_t size = A.size();
 	float res = 0;
 	float sumA2 = 0;
@@ -21,7 +21,7 @@ float cosineSimilarity(std::vector<float>& A, std::vector<float>& B) {
 };
 
 template<class T>
-vector<int> HungarianAlgorithm(vector<vector<T>> g)
+static vector<int> HungarianAlgorithm(vector<vector<T>> g)
 {
 	int n = g.size() - 1;
 	vector<int> par(n + 1, 0);
@@ -106,13 +106,6 @@ ObjectTracker::ObjectTracker(float not_found_segment_cost,
 }
 
 
-
-
-
-
-
-
-
 vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Point, Point>> &segments) {
 	vector<Point> segments_centers;
 	/*
@@ -170,16 +163,16 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 	combination = HungarianAlgorithm<float>(matrix);
 	
 	if (is_first) {
-		cout << ""; // << endl;
+	//	cout << ""; // << endl;
 	}
 
 	if (segments.size() != 0) {
 		is_first = true;
-		cout << endl << endl << "Non zero segments size: " << segments.size() << endl;
+	//	cout << endl << endl << "Non zero segments size: " << segments.size() << endl;
 	}
 
 	if (segments.size() == 2) {
-		cout << "";
+	//	cout << "";
 	}
 
 	for (int i = 1; i < combination.size(); ++i)
@@ -187,13 +180,12 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 		size_t objID = combination[i] - 1, segID = i - 1;
 
 		// if found object for segment
-		// Shall we use !current_objects.empty() && ... ?
 		//if (cosineSimilarity(current_objects[objID].feature, segments[segID].feature) >= similarityThreshold)
 		//if (matrix[objID][segID] >= similarityThreshold)
 
 		if (objID < current_objects.size() && (segID < segments.size()))
 		{
-			cout << objID << " <-> " << segID << " with ID: " << current_objects[objID].id << endl;
+	//		cout << objID << " <-> " << segID << " with ID: " << current_objects[objID].id << endl;
 			current_objects[objID].pos = segments[segID].pos;
 			current_objects[objID].feature = segments[segID].feature;
 			Point center((segments[segID].pos[0].x + segments[segID].pos[1].x) / 2,
@@ -205,7 +197,7 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 		// if not found any segment for �urrent object :
 		else if (segID >= segments.size() && (objID < current_objects.size()))
 		{
-			cout << objID << " no segments for that" << " with ID: " << current_objects[objID].id << endl;
+	//		cout << objID << " no segments for that" << " with ID: " << current_objects[objID].id << endl;
 			current_objects[objID].TrackerCounter++;
 			if (current_objects[objID].TrackerCounter >= 10)
 			{
@@ -216,7 +208,7 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 		else if (objID >= current_objects.size() && (segID < segments.size()))
 		{
 			Object new_obj = Object(segments[segID].pos, segments[segID].feature, next_id);
-			cout << objID << "new one" << " with ID: " << next_id << endl;
+	//		cout << objID << "new one" << " with ID: " << next_id << endl;
 			next_id++;
 			current_objects.push_back(new_obj);
 			//segments_centers[segID].obj = &current_objects.back();
