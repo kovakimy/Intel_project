@@ -11,11 +11,11 @@
 #define pd 60
 
 static const char* keys =
-"{ m  models_path          | <none>	| path to models                                                                }"
-"{ v  video_path           | <none>	| path to models                                                                }"
-"{ o  outpath              | <none>     | path to save clips                                                            }"
-"{ mode                    | <none>     | mode to show result   mode=1 save result in out.avi    mode=2 show on screen  }"
-"{ help h usage ?          |            | print help message                                                            }";
+"{ m  models_path          | <none>	    | path to models                                                                    }"
+"{ v  video_path           | <none>	    | path to models                                                                    }"
+"{ o  outpath              | <none>     | path to save clips                                                                }"
+"{ mode                    | 1          | mode to show result   mode=1 save result in out.avi    mode=2 show on screen      }"
+"{ help h usage ?          |            | print help message                                                                }";
 
 void progressBar(double progress) {
 	int val = (int)(progress * 100);
@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
 
 	std::cout << "Progress bar..." << std::endl;
 
-        double fps = capture.get(cv::CAP_PROP_FPS);
+    double fps = capture.get(cv::CAP_PROP_FPS);
 
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
 	{
@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
 			out.write(frame);
 		}
 		if (mode == "2") {
-			cv::imshow("Display window", frame);
+			cv::imshow("AreaIntrusionDetection", frame);
 			if (cv::waitKey(5) >= 0)
 				break;
 		}
