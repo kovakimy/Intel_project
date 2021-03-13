@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/detector.hpp"
+#include "../include/ObjectDetector.hpp"
 #include "../include/ObjectTracker.hpp"
 #include "../include/ReidNetwork.hpp"
 #include "../include/LineCrossesAndAreaIntrusionDetection.hpp"
@@ -74,7 +74,7 @@ int main() {
 	double frame_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
 	double frame_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-	cv::VideoWriter out("C:\\Users\\kovakimy\\OneDrive - Intel Corporation\\Pictures\\intel_project\\Intel_project\\media\\out1.avi",
+	cv::VideoWriter out("../media/out1.avi",
 		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
 	//ObjectTracker NewTracker(FLT_MAX, FLT_MAX);

@@ -1,4 +1,4 @@
-#include "../include/Detector.hpp"
+#include "../include/ObjectDetector.hpp"
 //#include <samples/ocv_common.hpp>
 
 static InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat)
