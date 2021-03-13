@@ -34,5 +34,5 @@ private:
 public:
     Detector(const std::string &, const std::string &, const InferenceEngine::Core&);
     void createRequest(const cv::Mat&);
-    std::vector<DetectionObject>& getDetections(const cv::Mat &);
+    std::vector<DetectionObject> getDetections(const cv::Mat &);
 };

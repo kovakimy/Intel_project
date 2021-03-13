@@ -57,7 +57,7 @@ void Detector::createRequest(const cv::Mat& image) {
 }
 
 
-std::vector<DetectionObject>& Detector::getDetections(const cv::Mat &image)
+std::vector<DetectionObject> Detector::getDetections(const cv::Mat &image)
 {
     std::vector<DetectionObject> detectedObjects;
     float width_  = static_cast<float>(image.cols);

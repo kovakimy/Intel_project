@@ -23,8 +23,8 @@ static InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat)
 		(strideW == channels &&
 		strideH == channels * width);
 
-	//if (!is_dense) THROW_IE_EXCEPTION
-	//	<< "Doesn't support conversion from not dense cv::Mat";
+	if (!is_dense) THROW_IE_EXCEPTION
+		<< "Doesn't support conversion from not dense cv::Mat";
 
 	InferenceEngine::TensorDesc tDesc(InferenceEngine::Precision::U8,
 		{ 1, channels, height, width },
@@ -88,7 +88,10 @@ void ReidentificationNet::createRequest(const cv::Mat &pic_part){
 	//5) Create an infer request
 	request = executable_network.CreateInferRequest();
 	//6) Prepare input
-	Blob::Ptr imgBlob = wrapMat2Blob(pic_part);
+	//InferenceEngine::TensorDesc tDesc(InferenceEngine::Precision::U8,
+	//	{ 1, (size_t)pic_part.channels(), (size_t)pic_part.size().height, (size_t)pic_part.size().width },
+	//	InferenceEngine::Layout::NCHW);
+	Blob::Ptr imgBlob = wrapMat2Blob(pic_part);//InferenceEngine::make_shared_blob<uint8_t>(tDesc, pic_part.data);
     request.SetBlob(inputName, imgBlob);
 
 	width_ = static_cast<float>(pic_part.cols);

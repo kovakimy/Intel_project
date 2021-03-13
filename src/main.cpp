@@ -23,16 +23,26 @@ void progressBar(double progress) {
 //cv2.polylines(img, np.array([obj.trajectory], np.int32), False, (0, 0, 0), 4)
 
 cv::Mat crop(cv::Mat& img, int xmin, int ymin, int xmax, int ymax) {
-	cv::Rect roi;
-	roi.x = xmin;
-	roi.y = ymin;//img.size().height - ymax;
-	roi.width = abs(xmax - xmin) - 2;
-	roi.height = ymax - ymin;
+//	cv::Rect roi;
+//	roi.x = xmin;
+//	roi.y = ymin;//img.size().height - ymax;
+	//roi.width = abs(xmax - xmin) - 2;
+	//roi.height = ymax - ymin;
 
-	cv::Mat crop = img(roi);
+	//cv::Mat crop = img(roi);
+
+	int width = xmax - xmin, height = ymax - ymin;
+
+	cv::Mat ROI(img, cv::Rect(xmin, ymin, width, height));
+
+	cv::Mat crop;
+
+	// Copy the data into new matrix
+	ROI.copyTo(crop);
+
 	//cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);// Create a window for display.
 	//imshow("Display window", crop);
-   // cv::waitKey(0);
+  //  cv::waitKey(0);
 	return crop;
 }
 
@@ -78,7 +88,7 @@ int main() {
 		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
 	//ObjectTracker NewTracker(FLT_MAX, FLT_MAX);
-	ObjectTracker NewTracker(0.75, 0.75);
+	ObjectTracker NewTracker(0.78, 0.78);
 	auto solver = LineCrossesAndAreaIntrusionDetection();
 	auto drawer = Drawer();
 
@@ -116,6 +126,11 @@ int main() {
 		drawer.drawAreas(frame, areas);
 		
 		out.write(frame);
+	//	if (detections.size() > 2) {
+	//	cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);// Create a window for display.
+	 //   imshow("Display window", frame);
+    //    cv::waitKey(0);
+	//	}
 		frame_counter++;
 		capture >> frame;
 	}
