@@ -26,7 +26,7 @@ static InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat)
 
 Detector::Detector(const std::string &modelPath, const std::string &configPath, const InferenceEngine::Core& ie_) : modelPath(modelPath), configPath(configPath), ie(ie_)
 {
-	this->cnnNetwork = ie.ReadNetwork(modelPath, configPath);
+    this->cnnNetwork = ie.ReadNetwork(modelPath, configPath);
     inputShapes = cnnNetwork.getInputShapes();
     this->inName = inputShapes.begin()->first;
     InferenceEngine::SizeVector& inSizeVector = inputShapes.begin()->second;
@@ -57,7 +57,7 @@ void Detector::createRequest(const cv::Mat& image) {
 }
 
 
-std::vector<DetectionObject> Detector::getDetections(const cv::Mat &image)
+std::vector<DetectionObject>& Detector::getDetections(const cv::Mat &image)
 {
     std::vector<DetectionObject> detectedObjects;
     float width_  = static_cast<float>(image.cols);
