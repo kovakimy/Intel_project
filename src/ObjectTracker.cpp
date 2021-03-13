@@ -162,18 +162,20 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 	vector<int> objects_to_del;
 	combination = HungarianAlgorithm<float>(matrix);
 	
-	if (is_first) {
+	//if (is_first) {
 	//	cout << ""; // << endl;
-	}
+	//}
 
-	if (segments.size() != 0) {
-		is_first = true;
+	//if (segments.size() != 0) {
+	//	is_first = true;
 	//	cout << endl << endl << "Non zero segments size: " << segments.size() << endl;
-	}
+	//}
 
-	if (segments.size() == 2) {
+	//if (segments.size() == 2) {
 	//	cout << "";
-	}
+	//}
+
+	vector<Object> objects_to_return;
 
 	for (int i = 1; i < combination.size(); ++i)
 	{
@@ -192,6 +194,8 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 				(segments[segID].pos[0].y + segments[segID].pos[1].y) / 2);
 			current_objects[objID].TrackerCounter = 0;
 			current_objects[objID].trajectory.push_back(center);
+			if (matrix[objID + 1][segID + 1] >= 0.7)
+				objects_to_return.push_back(current_objects[objID]);
 		}
 
 		// if not found any segment for �urrent object :
@@ -222,5 +226,5 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 	{
 		current_objects.erase(current_objects.begin() + ind);
 	}
-	return current_objects;
+	return objects_to_return;
 }
