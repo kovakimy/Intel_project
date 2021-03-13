@@ -10,6 +10,13 @@
 #define str "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define pd 60
 
+static const char* keys =
+"{ m  models_path          | <none>	| path to models                                                                }"
+"{ v  video_path           | <none>	| path to models                                                                }"
+"{ o  outpath              | <none>     | path to save clips                                                            }"
+"{ mode                    | <none>     | mode to show result   mode=1 save result in out.avi    mode=2 show on screen  }"
+"{ help h usage ?          |            | print help message                                                            }";
+
 void progressBar(double progress) {
 	int val = (int)(progress * 100);
 	int left = (int)(progress * pd);
@@ -64,14 +71,33 @@ std::vector<Object> turnToObject(std::vector<DetectionObject>& detections, cv::M
 }
 
 
-int main() {
+int main(int argc, char** argv) {
+
+	cv::CommandLineParser parser(argc, argv, keys);
+
+	if (parser.has("help"))
+	{
+		parser.printMessage();
+		return 0;
+	}
+
+	cv::String FLAGS_m                 = parser.get<cv::String>("m") + "/pedestrian-detection-adas-0002.xml";
+	cv::String FLAGS_c                 = parser.get<cv::String>("m") + "/pedestrian-detection-adas-0002.bin";
+	cv::String FLAGS_mReidentification = parser.get<cv::String>("m") + "/person-reidentification-retail-0286.xml";
+	cv::String FLAGS_cReidentification = parser.get<cv::String>("m") + "/person-reidentification-retail-0286.bin";
+	cv::String FLAGS_v                 = parser.get<cv::String>("v");
+	cv::String out_path                = parser.get<cv::String>("o") + "/out1.avi";
+	cv::String mode                    = parser.get<cv::String>("mode");
+
+	if (!parser.check())
+	{
+		parser.printErrors();
+		throw "Parse error";
+		return 0;
+	}
+
 	InferenceEngine::Core ie;
 	InferenceEngine::Core reid_ie;
-	std::string FLAGS_m = "../models/pedestrian-detection-adas-0002.xml";
-	std::string FLAGS_c = "../models/pedestrian-detection-adas-0002.bin";
-	std::string FLAGS_v = "../media/people-detection.mp4";
-	std::string FLAGS_mReidentification = "../models/person-reidentification-retail-0286.xml";
-	std::string FLAGS_cReidentification = "../models/person-reidentification-retail-0286.bin";
 
 	Detector detector(FLAGS_m, FLAGS_c, ie);
 	ReidentificationNet ri(FLAGS_mReidentification, FLAGS_cReidentification, ie);
@@ -84,7 +110,7 @@ int main() {
 	double frame_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
 	double frame_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-	cv::VideoWriter out("../media/out1.avi",
+	cv::VideoWriter out(out_path,
 		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
 	//ObjectTracker NewTracker(FLT_MAX, FLT_MAX);
@@ -98,6 +124,9 @@ int main() {
 	std::vector<BoundaryLine> boundaryLines = { BoundaryLine(cv::Point(217, 40), cv::Point(50,400)), BoundaryLine(cv::Point(440, 40), cv::Point(700,400)) };
 
 	std::cout << "Progress bar..." << std::endl;
+
+        double fps = capture.get(cv::CAP_PROP_FPS);
+
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
 	{
 		progressBar((frame_counter + 1) / capture.get(cv::CAP_PROP_FRAME_COUNT));
@@ -125,16 +154,20 @@ int main() {
 		drawer.drawBoundaryLines(frame, boundaryLines);
 		drawer.drawAreas(frame, areas);
 		
-		out.write(frame);
-	//	if (detections.size() > 2) {
-	//	cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);// Create a window for display.
-	 //   imshow("Display window", frame);
-    //    cv::waitKey(0);
-	//	}
+		if (mode == "1")
+		{
+			out.write(frame);
+		}
+		if (mode == "2") {
+			cv::imshow("Display window", frame);
+			if (cv::waitKey(5) >= 0)
+				break;
+		}
 		frame_counter++;
 		capture >> frame;
 	}
-
+	std::cout << std::endl;
+	std::cout << "Frames per second using video.get(CAP_PROP_FPS) : " << fps << std::endl;
 	std::cout << std::endl;
 	std::cout << "Completed";
 	return 0;
