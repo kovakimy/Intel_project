@@ -22,10 +22,17 @@ struct DetectionObject
 
 class Detector
 {
-public:
+private:
+    InferenceEngine::ExecutableNetwork executableNetwork;
     InferenceEngine::Core ie;
     InferenceEngine::CNNNetwork cnnNetwork;
     std::string modelPath, configPath;
-    Detector(std::string &modelPath, std::string &configPath);
-    std::vector<DetectionObject> getDetections(cv::Mat &image);
+    InferenceEngine::ICNNNetwork::InputShapes inputShapes;
+    std::string inName, outName;
+    int out_blob_h, out_blob_w;
+    InferenceEngine::InferRequest inferRequest;
+public:
+    Detector(const std::string &, const std::string &, const InferenceEngine::Core&);
+    void createRequest(const cv::Mat&);
+    std::vector<DetectionObject> getDetections(const cv::Mat &);
 };

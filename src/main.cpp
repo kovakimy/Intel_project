@@ -63,7 +63,7 @@ int main() {
 	std::string FLAGS_mReidentification = "../models/person-reidentification-retail-0286.xml";
 	std::string FLAGS_cReidentification = "../models/person-reidentification-retail-0286.bin";
 
-	Detector detector(FLAGS_m, FLAGS_c);
+	Detector detector(FLAGS_m, FLAGS_c, ie);
 	ReidentificationNet ri(FLAGS_mReidentification, FLAGS_cReidentification, ie);
 
 	int frame_counter = 1;
@@ -74,7 +74,7 @@ int main() {
 	double frame_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
 	double frame_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-	cv::VideoWriter out("../media/out1.avi",
+	cv::VideoWriter out("C:\\Users\\kovakimy\\OneDrive - Intel Corporation\\Pictures\\intel_project\\Intel_project\\media\\out1.avi",
 		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
 	//ObjectTracker NewTracker(FLT_MAX, FLT_MAX);
@@ -101,15 +101,15 @@ int main() {
 		std::vector<Object> objects;
 
 		objects = turnToObject(detections, frame, ri);
-		//tracking
+		////tracking
 
 		objects = NewTracker.Track(objects);
 
-		//check
+		////check
 		solver.checkAreaIntrusion(areas, objects);
 		solver.checkLineCrosses(boundaryLines, objects);
 
-		//drawing
+		////drawing
 		drawer.drawBboxWithId(frame, objects);
 		drawer.drawTrajectory(frame, objects);
 		drawer.drawBoundaryLines(frame, boundaryLines);
