@@ -3,7 +3,6 @@
 #include <string>
 #include <opencv2/core/core.hpp>
 #include <ie_core.hpp>
-//#include <inference_engine.hpp>
 
 //model_reid = 'person-reidentification-retail-0286'
 

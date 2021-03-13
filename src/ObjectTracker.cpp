@@ -194,7 +194,7 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 				(segments[segID].pos[0].y + segments[segID].pos[1].y) / 2);
 			current_objects[objID].TrackerCounter = 0;
 			current_objects[objID].trajectory.push_back(center);
-			if (matrix[objID + 1][segID + 1] >= 0.7)
+			if (matrix[objID + 1][segID + 1] >= similarityThreshold)
 				objects_to_return.push_back(current_objects[objID]);
 		}
 
@@ -203,7 +203,7 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 		{
 	//		cout << objID << " no segments for that" << " with ID: " << current_objects[objID].id << endl;
 			current_objects[objID].TrackerCounter++;
-			if (current_objects[objID].TrackerCounter >= 10)
+			if (current_objects[objID].TrackerCounter >= 7)
 			{
 				objects_to_del.push_back(objID);
 				break;
@@ -215,6 +215,7 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 	//		cout << objID << "new one" << " with ID: " << next_id << endl;
 			next_id++;
 			current_objects.push_back(new_obj);
+			//objects_to_return.push_back(new_obj);
 			//segments_centers[segID].obj = &current_objects.back();
 		}
 	}

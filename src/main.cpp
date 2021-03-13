@@ -30,20 +30,10 @@ void progressBar(double progress) {
 //cv2.polylines(img, np.array([obj.trajectory], np.int32), False, (0, 0, 0), 4)
 
 cv::Mat crop(cv::Mat& img, int xmin, int ymin, int xmax, int ymax) {
-//	cv::Rect roi;
-//	roi.x = xmin;
-//	roi.y = ymin;//img.size().height - ymax;
-	//roi.width = abs(xmax - xmin) - 2;
-	//roi.height = ymax - ymin;
-
-	//cv::Mat crop = img(roi);
 
 	int width = xmax - xmin, height = ymax - ymin;
-
 	cv::Mat ROI(img, cv::Rect(xmin, ymin, width, height));
-
 	cv::Mat crop;
-
 	// Copy the data into new matrix
 	ROI.copyTo(crop);
 
@@ -114,7 +104,7 @@ int main(int argc, char** argv) {
 		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
 	//ObjectTracker NewTracker(FLT_MAX, FLT_MAX);
-	ObjectTracker NewTracker(0.78, 0.78);
+	ObjectTracker NewTracker(0.6, 0.6);
 	auto solver = LineCrossesAndAreaIntrusionDetection();
 	auto drawer = Drawer();
 
