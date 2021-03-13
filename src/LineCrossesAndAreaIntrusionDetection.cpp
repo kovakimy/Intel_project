@@ -11,10 +11,14 @@ void LineCrossesAndAreaIntrusionDetection::checkLineCrosses(std::vector<Boundary
 		cv::Point p1_traj = object.trajectory[trajLen - 2];
 
 		for (auto& bLine : boundaryLines) {
-			if (segmentsIntersect(p0_traj, p1_traj, bLine.p0, bLine.p1))
-				bLine.count1 += 1;
-			else
-				bLine.count2 += 1;
+			if (segmentsIntersect(p0_traj, p1_traj, bLine.p0, bLine.p1)) {
+				if (computeAngle(p0_traj, p1_traj, bLine.p0, bLine.p1) < 180) {
+					bLine.count1 += 1;
+				}
+				else {
+					bLine.count2 += 1;
+				}
+			}	
 		}
 	}
 }
