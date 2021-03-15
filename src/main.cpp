@@ -128,8 +128,7 @@ int main(int argc, char** argv) {
 			continue;
 		}
 
-		if (frame_counter % 3 == 0)
-		{
+		
 
 
 			std::vector<DetectionObject> detections = detector.getDetections(frame);
@@ -150,7 +149,7 @@ int main(int argc, char** argv) {
 			drawer.drawBoundaryLines(frame, boundaryLines);
 			drawer.drawAreas(frame, areas);
 
-		}
+		
 		
 		if (mode == "1")
 		{
