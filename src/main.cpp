@@ -116,6 +116,7 @@ int main(int argc, char** argv) {
 	std::cout << "Progress bar..." << std::endl;
 
     double fps = capture.get(cv::CAP_PROP_FPS);
+	
 
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
 	{
@@ -126,23 +127,30 @@ int main(int argc, char** argv) {
 			frame_counter++;
 			continue;
 		}
-		std::vector<DetectionObject> detections = detector.getDetections(frame);
-		std::vector<Object> objects;
 
-		objects = turnToObject(detections, frame, ri);
-		////tracking
+		if (frame_counter % 3 == 0)
+		{
 
-		objects = NewTracker.Track(objects);
 
-		////check
-		solver.checkAreaIntrusion(areas, objects);
-		solver.checkLineCrosses(boundaryLines, objects);
+			std::vector<DetectionObject> detections = detector.getDetections(frame);
+			std::vector<Object> objects;
 
-		////drawing
-		drawer.drawBboxWithId(frame, objects);
-		drawer.drawTrajectory(frame, objects);
-		drawer.drawBoundaryLines(frame, boundaryLines);
-		drawer.drawAreas(frame, areas);
+			objects = turnToObject(detections, frame, ri);
+			////tracking
+
+			objects = NewTracker.Track(objects);
+
+			////check
+			solver.checkAreaIntrusion(areas, objects);
+			solver.checkLineCrosses(boundaryLines, objects);
+
+			////drawing
+			drawer.drawBboxWithId(frame, objects);
+			drawer.drawTrajectory(frame, objects);
+			drawer.drawBoundaryLines(frame, boundaryLines);
+			drawer.drawAreas(frame, areas);
+
+		}
 		
 		if (mode == "1")
 		{
