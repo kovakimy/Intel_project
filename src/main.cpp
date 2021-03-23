@@ -12,7 +12,7 @@
 
 static const char* keys =
 "{ m  models_path          | <none>	    | path to models                                                                    }"
-"{ v  video_path           | <none>	    | path to models                                                                    }"
+"{ v  video_path           | <none>	    | path to video                                                                    }"
 "{ o  outpath              | <none>     | path to save clips                                                                }"
 "{ mode                    | 1          | mode to show result   mode=1 save result in out.avi    mode=2 show on screen      }"
 "{ help h usage ?          |            | print help message                                                                }";
@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
 	cv::String FLAGS_mReidentification = parser.get<cv::String>("m") + "/person-reidentification-retail-0286.xml";
 	cv::String FLAGS_cReidentification = parser.get<cv::String>("m") + "/person-reidentification-retail-0286.bin";
 	cv::String FLAGS_v                 = parser.get<cv::String>("v");
-	cv::String out_path                = parser.get<cv::String>("o") + "/out1.avi";
+	cv::String out_path                = parser.get<cv::String>("o") + "/out.avi";
 	cv::String mode                    = parser.get<cv::String>("mode");
 
 	if (!parser.check())
@@ -90,6 +90,7 @@ int main(int argc, char** argv) {
 	InferenceEngine::Core reid_ie;
 
 	Detector detector(FLAGS_m, FLAGS_c, ie);
+
 	ReidentificationNet ri(FLAGS_mReidentification, FLAGS_cReidentification, ie);
 
 	int frame_counter = 1;
@@ -116,7 +117,6 @@ int main(int argc, char** argv) {
 	std::cout << "Progress bar..." << std::endl;
 
     double fps = capture.get(cv::CAP_PROP_FPS);
-	
 
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
 	{
@@ -128,28 +128,23 @@ int main(int argc, char** argv) {
 			continue;
 		}
 
-		
+		std::vector<DetectionObject> detections = detector.getDetections(frame);
+		std::vector<Object> objects;
+			
+		objects = turnToObject(detections, frame, ri);
+		////tracking
 
+		objects = NewTracker.Track(objects);
 
-			std::vector<DetectionObject> detections = detector.getDetections(frame);
-			std::vector<Object> objects;
+		////check
+		solver.checkAreaIntrusion(areas, objects);
+		solver.checkLineCrosses(boundaryLines, objects);
 
-			objects = turnToObject(detections, frame, ri);
-			////tracking
-
-			objects = NewTracker.Track(objects);
-
-			////check
-			solver.checkAreaIntrusion(areas, objects);
-			solver.checkLineCrosses(boundaryLines, objects);
-
-			////drawing
-			drawer.drawBboxWithId(frame, objects);
-			drawer.drawTrajectory(frame, objects);
-			drawer.drawBoundaryLines(frame, boundaryLines);
-			drawer.drawAreas(frame, areas);
-
-		
+		////drawing
+		drawer.drawBboxWithId(frame, objects);
+		drawer.drawTrajectory(frame, objects);
+		drawer.drawBoundaryLines(frame, boundaryLines);
+		drawer.drawAreas(frame, areas);
 		
 		if (mode == "1")
 		{
@@ -163,6 +158,7 @@ int main(int argc, char** argv) {
 		frame_counter++;
 		capture >> frame;
 	}
+
 	std::cout << std::endl;
 	std::cout << "Frames per second using video.get(CAP_PROP_FPS) : " << fps << std::endl;
 	std::cout << std::endl;
