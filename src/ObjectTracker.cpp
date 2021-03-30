@@ -106,6 +106,21 @@ ObjectTracker::ObjectTracker(float not_found_segment_cost,
 }
 
 
+float dist_norm(const Point& prev_center, const Point& curr_center) {
+	float dist = sqrt(pow(prev_center.x - curr_center.x, 2.) + 
+		pow(prev_center.y - curr_center.y, 2.));
+	float returned_value = 0;
+	float wall = 150.;
+	if (dist > wall) {
+		returned_value = 1.;
+	}
+	else {
+		returned_value = dist / wall;
+	}
+	return 1. - returned_value;
+}
+
+
 vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Point, Point>> &segments) {
 	vector<Point> segments_centers;
 	/*
@@ -125,11 +140,21 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 	for (int i = 1; i <= current_objects.size(); i++) {
 		for (int j = 1; j <= segments.size(); j++) {
 			item = cosineSimilarity(current_objects[i-1].feature, segments[j-1].feature);
+
 			max_item = max(max_item, item);
-			matrix[i][j] = item;
+			int last_item_number = current_objects[i-1].trajectory.size() - 1;
+			float dist_value = 0;
+			/*if (last_item_number >= 0) {
+				Point center((segments[j-1].pos[0].x + segments[j - 1].pos[1].x) / 2,
+					(segments[j - 1].pos[0].y + segments[j - 1].pos[1].y) / 2);
+				dist_value = dist_norm(current_objects[i - 1].trajectory[last_item_number],
+					center);
+			}*/
+			//cout << dist_value << endl;
+			matrix[i][j] = item;// +dist_value;
 		}
 	}
-	max_item *= 10;
+	max_item *= 20;
 
 	for (int i = 1; i <= current_objects.size(); i++) {
 		for (int j = segments.size() + 1; j <= size; j++) {
@@ -155,7 +180,7 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 
 	for (int i = current_objects.size() + 1; i <= size; i++) {
 		for (int j = segments.size() + 1; j <= size; j++) {
-			matrix[i][j] = max_item;
+			matrix[i][j] = 0.1;
 		}
 	}
 
@@ -185,23 +210,22 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 		//if (cosineSimilarity(current_objects[objID].feature, segments[segID].feature) >= similarityThreshold)
 		//if (matrix[objID][segID] >= similarityThreshold)
 
-		if (objID < current_objects.size() && (segID < segments.size()))
+		if (objID < current_objects.size() && (segID < segments.size()) && (matrix[objID + 1][segID + 1] >= similarityThreshold))
 		{
-	//		cout << objID << " <-> " << segID << " with ID: " << current_objects[objID].id << endl;
+			//cout << objID << " <-> " << segID << " with ID: " << current_objects[objID].id << endl;
 			current_objects[objID].pos = segments[segID].pos;
 			current_objects[objID].feature = segments[segID].feature;
 			Point center((segments[segID].pos[0].x + segments[segID].pos[1].x) / 2,
 				(segments[segID].pos[0].y + segments[segID].pos[1].y) / 2);
 			current_objects[objID].TrackerCounter = 0;
 			current_objects[objID].trajectory.push_back(center);
-			if (matrix[objID + 1][segID + 1] >= similarityThreshold)
-				objects_to_return.push_back(current_objects[objID]);
+			objects_to_return.push_back(current_objects[objID]);
 		}
 
 		// if not found any segment for �urrent object :
 		else if (segID >= segments.size() && (objID < current_objects.size()))
 		{
-	//		cout << objID << " no segments for that" << " with ID: " << current_objects[objID].id << endl;
+			//cout << objID << " no segments for that" << " with ID: " << current_objects[objID].id << endl;
 			current_objects[objID].TrackerCounter++;
 			if (current_objects[objID].TrackerCounter >= 7)
 			{
@@ -212,7 +236,7 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 		else if (objID >= current_objects.size() && (segID < segments.size()))
 		{
 			Object new_obj = Object(segments[segID].pos, segments[segID].feature, next_id);
-	//		cout << objID << "new one" << " with ID: " << next_id << endl;
+			//cout << objID << "new one" << " with ID: " << next_id << endl;
 			next_id++;
 			current_objects.push_back(new_obj);
 			//objects_to_return.push_back(new_obj);

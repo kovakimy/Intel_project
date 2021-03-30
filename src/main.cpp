@@ -10,13 +10,6 @@
 #define str "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define pd 60
 
-static const char* keys =
-"{ m  models_path          | <none>	    | path to models                                                                    }"
-"{ v  video_path           | <none>	    | path to video                                                                    }"
-"{ o  outpath              | <none>     | path to save clips                                                                }"
-"{ mode                    | 1          | mode to show result   mode=1 save result in out.avi    mode=2 show on screen      }"
-"{ help h usage ?          |            | print help message                                                                }";
-
 void progressBar(double progress) {
 	int val = (int)(progress * 100);
 	int left = (int)(progress * pd);
@@ -30,16 +23,26 @@ void progressBar(double progress) {
 //cv2.polylines(img, np.array([obj.trajectory], np.int32), False, (0, 0, 0), 4)
 
 cv::Mat crop(cv::Mat& img, int xmin, int ymin, int xmax, int ymax) {
+	//	cv::Rect roi;
+	//	roi.x = xmin;
+	//	roi.y = ymin;//img.size().height - ymax;
+		//roi.width = abs(xmax - xmin) - 2;
+		//roi.height = ymax - ymin;
+
+		//cv::Mat crop = img(roi);
 
 	int width = xmax - xmin, height = ymax - ymin;
+
 	cv::Mat ROI(img, cv::Rect(xmin, ymin, width, height));
+
 	cv::Mat crop;
+
 	// Copy the data into new matrix
 	ROI.copyTo(crop);
 
 	//cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);// Create a window for display.
 	//imshow("Display window", crop);
-  //  cv::waitKey(0);
+ //   cv::waitKey(0);
 	return crop;
 }
 
@@ -61,36 +64,16 @@ std::vector<Object> turnToObject(std::vector<DetectionObject>& detections, cv::M
 }
 
 
-int main(int argc, char** argv) {
-
-	cv::CommandLineParser parser(argc, argv, keys);
-
-	if (parser.has("help"))
-	{
-		parser.printMessage();
-		return 0;
-	}
-
-	cv::String FLAGS_m                 = parser.get<cv::String>("m") + "/pedestrian-detection-adas-0002.xml";
-	cv::String FLAGS_c                 = parser.get<cv::String>("m") + "/pedestrian-detection-adas-0002.bin";
-	cv::String FLAGS_mReidentification = parser.get<cv::String>("m") + "/person-reidentification-retail-0286.xml";
-	cv::String FLAGS_cReidentification = parser.get<cv::String>("m") + "/person-reidentification-retail-0286.bin";
-	cv::String FLAGS_v                 = parser.get<cv::String>("v");
-	cv::String out_path                = parser.get<cv::String>("o") + "/out.avi";
-	cv::String mode                    = parser.get<cv::String>("mode");
-
-	if (!parser.check())
-	{
-		parser.printErrors();
-		throw "Parse error";
-		return 0;
-	}
-
+int main() {
 	InferenceEngine::Core ie;
 	InferenceEngine::Core reid_ie;
+	std::string FLAGS_m = "../models/person-detection-0202.xml";
+	std::string FLAGS_c = "../models/person-detection-0202.bin";
+	std::string FLAGS_v = "../media/people-detection.mp4";
+	std::string FLAGS_mReidentification = "../models/person-reidentification-retail-0286.xml";
+	std::string FLAGS_cReidentification = "../models/person-reidentification-retail-0286.bin";
 
 	Detector detector(FLAGS_m, FLAGS_c, ie);
-
 	ReidentificationNet ri(FLAGS_mReidentification, FLAGS_cReidentification, ie);
 
 	int frame_counter = 1;
@@ -101,11 +84,11 @@ int main(int argc, char** argv) {
 	double frame_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
 	double frame_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-	cv::VideoWriter out(out_path,
+	cv::VideoWriter out("../media/out11.avi",
 		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
 	//ObjectTracker NewTracker(FLT_MAX, FLT_MAX);
-	ObjectTracker NewTracker(0.6, 0.6);
+	ObjectTracker NewTracker(0.42, 0.42);  // (0.6, 0.25) (0.8, 0.8)
 	auto solver = LineCrossesAndAreaIntrusionDetection();
 	auto drawer = Drawer();
 
@@ -115,9 +98,6 @@ int main(int argc, char** argv) {
 	std::vector<BoundaryLine> boundaryLines = { BoundaryLine(cv::Point(217, 40), cv::Point(50,400)), BoundaryLine(cv::Point(440, 40), cv::Point(700,400)) };
 
 	std::cout << "Progress bar..." << std::endl;
-
-    double fps = capture.get(cv::CAP_PROP_FPS);
-
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
 	{
 		progressBar((frame_counter + 1) / capture.get(cv::CAP_PROP_FRAME_COUNT));
@@ -127,10 +107,9 @@ int main(int argc, char** argv) {
 			frame_counter++;
 			continue;
 		}
-
 		std::vector<DetectionObject> detections = detector.getDetections(frame);
 		std::vector<Object> objects;
-			
+
 		objects = turnToObject(detections, frame, ri);
 		////tracking
 
@@ -145,22 +124,17 @@ int main(int argc, char** argv) {
 		drawer.drawTrajectory(frame, objects);
 		drawer.drawBoundaryLines(frame, boundaryLines);
 		drawer.drawAreas(frame, areas);
-		
-		if (mode == "1")
-		{
-			out.write(frame);
-		}
-		if (mode == "2") {
-			cv::imshow("AreaIntrusionDetection", frame);
-			if (cv::waitKey(5) >= 0)
-				break;
-		}
+
+		out.write(frame);
+		//	if (detections.size() > 2) {
+		//	cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);// Create a window for display.
+		 //   imshow("Display window", frame);
+		//    cv::waitKey(0);
+		//	}
 		frame_counter++;
 		capture >> frame;
 	}
 
-	std::cout << std::endl;
-	std::cout << "Frames per second using video.get(CAP_PROP_FPS) : " << fps << std::endl;
 	std::cout << std::endl;
 	std::cout << "Completed";
 	return 0;
