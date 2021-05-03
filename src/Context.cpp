@@ -3,7 +3,18 @@
 using namespace cv;
 
 Object::Object(std::vector<Point>& pos, std::vector<float>& feature, int id)
-	: pos(pos), feature(feature), id(id), time(std::chrono::steady_clock::now()) { };
+	: pos(pos), feature(feature), id(id), time(std::chrono::steady_clock::now()) 
+{ 
+	for (std::size_t i = 0; i < 4; ++i)
+	{
+		P.push_back(std::vector<float>(4, 0));
+		x.push_back(std::vector<float>(1, 0));
+	}
+	P[0][0] = 1000;
+	P[1][1] = 1000;
+	P[2][2] = 1000;
+	P[3][3] = 1000;
+};
 
 Area::Area(std::vector<Point>& contour)
 	: contour(contour), count(0) {};

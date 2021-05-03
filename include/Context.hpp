@@ -17,7 +17,8 @@
 
 struct Object {
 	explicit Object(std::vector<cv::Point>& pos, std::vector<float>& feature, int id = -1);
-
+	std::vector<std::vector<float>> x;
+	std::vector<std::vector<float>> P;
 	std::vector<cv::Point> pos;
 	std::vector<float> feature;
 	int TrackerCounter = 0;

@@ -4,6 +4,7 @@
 #include "../include/ReidNetwork.hpp"
 #include "../include/LineCrossesAndAreaIntrusionDetection.hpp"
 #include "../include/Drawer.hpp"
+#include "../include/Kalman.hpp"
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
@@ -77,6 +78,7 @@ int main() {
 	ReidentificationNet ri(FLAGS_mReidentification, FLAGS_cReidentification, ie);
 
 	int frame_counter = 1;
+	float R = 1e-4;
 	cv::Mat frame;
 	cv::Mat result;
 	cv::VideoCapture capture(FLAGS_v);
@@ -84,7 +86,7 @@ int main() {
 	double frame_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
 	double frame_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-	cv::VideoWriter out("../media/out11.avi",
+	cv::VideoWriter out("C:/Users/Andrey/Desktop/hse/Intel Project/fixed-tracker/Intel_project/media/out111.avi",
 		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
 	//ObjectTracker NewTracker(FLT_MAX, FLT_MAX);
@@ -108,13 +110,29 @@ int main() {
 			continue;
 		}
 		std::vector<DetectionObject> detections = detector.getDetections(frame);
+		
 		std::vector<Object> objects;
 
 		objects = turnToObject(detections, frame, ri);
 		////tracking
 
 		objects = NewTracker.Track(objects);
+		if (((frame_counter + 1) % 4) == 0)
+		{
+			objects = NewTracker.Track(objects);
 
+			for (auto& obj : objects)
+			{
+				kalman(obj.x, obj.P, obj.trajectory.back().x, obj.trajectory.back().y, R);
+			}
+		}
+		else
+		{
+			for (auto& obj : objects)
+			{
+				obj.trajectory.push_back(kalman(obj.x, obj.P, obj.trajectory.back().x, obj.trajectory.back().y, R));
+			}			
+		}
 		////check
 		solver.checkAreaIntrusion(areas, objects);
 		solver.checkLineCrosses(boundaryLines, objects);
