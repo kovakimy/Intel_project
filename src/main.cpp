@@ -112,13 +112,13 @@ int main() {
 		}
 		/*std::vector<DetectionObject> detections = detector.getDetections(frame);
 
-				std::vector<Object> objects;
+		std::vector<Object> objects;
 
-				objects = turnToObject(detections, frame, ri);
-				////tracking
+		objects = turnToObject(detections, frame, ri);
+		////tracking
 
-				objects = NewTracker.Track(objects);
-				*/
+		objects = NewTracker.Track(objects);
+		*/
 		if ((frame_counter % 3) == 0 || objects.size() == 0)
 		{
 			//std::vector<Object> objects;
@@ -134,9 +134,6 @@ int main() {
 			}
 		}
 		else
-		{
-
-		}
 		{
 			for (auto& obj : objects)
 			{
