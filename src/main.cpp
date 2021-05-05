@@ -100,6 +100,7 @@ int main() {
 	std::vector<BoundaryLine> boundaryLines = { BoundaryLine(cv::Point(217, 40), cv::Point(50,400)), BoundaryLine(cv::Point(440, 40), cv::Point(700,400)) };
 
 	std::cout << "Progress bar..." << std::endl;
+	std::vector<Object> objects;
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
 	{
 		progressBar((frame_counter + 1) / capture.get(cv::CAP_PROP_FRAME_COUNT));
@@ -109,16 +110,22 @@ int main() {
 			frame_counter++;
 			continue;
 		}
-		std::vector<DetectionObject> detections = detector.getDetections(frame);
-		
-		std::vector<Object> objects;
+		/*std::vector<DetectionObject> detections = detector.getDetections(frame);
 
-		objects = turnToObject(detections, frame, ri);
-		////tracking
+				std::vector<Object> objects;
 
-		objects = NewTracker.Track(objects);
-		if (((frame_counter + 1) % 4) == 0)
+				objects = turnToObject(detections, frame, ri);
+				////tracking
+
+				objects = NewTracker.Track(objects);
+				*/
+		if ((frame_counter % 3) == 0 || objects.size() == 0)
 		{
+			//std::vector<Object> objects;
+			std::vector<DetectionObject> detections = detector.getDetections(frame);
+			objects = turnToObject(detections, frame, ri);
+			////tracking
+
 			objects = NewTracker.Track(objects);
 
 			for (auto& obj : objects)
@@ -128,10 +135,13 @@ int main() {
 		}
 		else
 		{
+
+		}
+		{
 			for (auto& obj : objects)
 			{
 				obj.trajectory.push_back(kalman(obj.x, obj.P, obj.trajectory.back().x, obj.trajectory.back().y, R));
-			}			
+			}
 		}
 		////check
 		solver.checkAreaIntrusion(areas, objects);
