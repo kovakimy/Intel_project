@@ -7,6 +7,10 @@
 #include <opencv2/core/types.hpp>
 #include "../include/Context.hpp"
 
+#include <opencv2/core/utility.hpp>
+#include <opencv2/tracking.hpp>
+#include <opencv2/videoio.hpp>
+
 #pragma once
 
 
@@ -24,5 +28,5 @@ private:
 public:
 	ObjectTracker(float not_found_segment_cost, float not_found_object_cost);
 	//vector<int> SetStartObjects(vector<Object> objects_centers);
-	std::vector<Object> Track(std::vector<Object>& segments);
+	std::vector<Object> Track(std::vector<Object>& segments, std::vector<Ptr<Tracker>>& algorithms);
 };

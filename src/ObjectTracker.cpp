@@ -1,6 +1,5 @@
 ﻿#include "../include/ObjectTracker.hpp"
 
-using namespace std;
 using namespace cv;
 
 // functions
@@ -21,13 +20,13 @@ static float cosineSimilarity(const std::vector<float>& A, const std::vector<flo
 };
 
 template<class T>
-static vector<int> HungarianAlgorithm(vector<vector<T>> g)
+static std::vector<int> HungarianAlgorithm(std::vector<std::vector<T>> g)
 {
 	int n = g.size() - 1;
-	vector<int> par(n + 1, 0);
-	vector<int> way(n + 1, 0);
-	vector<T> u(n + 1, 0);
-	vector<T> v(n + 1, 0);
+	std::vector<int> par(n + 1, 0);
+	std::vector<int> way(n + 1, 0);
+	std::vector<T> u(n + 1, 0);
+	std::vector<T> v(n + 1, 0);
 
 	for (int i = 1; i <= n; ++i)
 	{
@@ -50,8 +49,8 @@ static vector<int> HungarianAlgorithm(vector<vector<T>> g)
 		par[0] = i;
 		int prev_col = 0;
 		int next_col;
-		vector<T> minv(n + 1, INT_MAX);
-		vector<bool>  used(n + 1, false);
+		std::vector<T> minv(n + 1, INT_MAX);
+		std::vector<bool>  used(n + 1, false);
 
 		do {
 			used[prev_col] = true;
@@ -91,7 +90,7 @@ static vector<int> HungarianAlgorithm(vector<vector<T>> g)
 		} while (prev_col != 0);
 	}
 	v[0] *= -1; // total res
-	vector<int> res(n + 1, 0);
+	std::vector<int> res(n + 1, 0);
 	for (int j = 1; j <= n; ++j)
 		res[par[j]] = j;
 	return res;
@@ -121,8 +120,8 @@ float dist_norm(const Point& prev_center, const Point& curr_center) {
 }
 
 
-vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Point, Point>> &segments) {
-	vector<Point> segments_centers;
+std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vector<Ptr<Tracker>>& algorithms) {//(vector<pair<Point, Point>> &segments) {
+	std::vector<Point> segments_centers;
 	/*
 	for (auto& seg : segments)
 	{
@@ -134,8 +133,8 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 	float max_item = 0;
 	int size = current_objects.size() + segments.size();
 	float item = 0;
-	vector<vector<float>> matrix(size + 1, vector<float>(size + 1));
-	vector<int> combination(size + 1);
+	std::vector<std::vector<float>> matrix(size + 1, std::vector<float>(size + 1));
+	std::vector<int> combination(size + 1);
 	// Creating matrix for assignment algorithm
 	for (int i = 1; i <= current_objects.size(); i++) {
 		for (int j = 1; j <= segments.size(); j++) {
@@ -184,7 +183,7 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 		}
 	}
 
-	vector<int> objects_to_del;
+	std::vector<int> objects_to_del;
 	combination = HungarianAlgorithm<float>(matrix);
 	
 	//if (is_first) {
@@ -200,7 +199,7 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 	//	cout << "";
 	//}
 
-	vector<Object> objects_to_return;
+	std::vector<Object> objects_to_return;
 
 	for (int i = 1; i < combination.size(); ++i)
 	{
@@ -239,6 +238,7 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 			//cout << objID << "new one" << " with ID: " << next_id << endl;
 			next_id++;
 			current_objects.push_back(new_obj);
+			algorithms.push_back(createTrackerByName(trackingAlg));
 			//objects_to_return.push_back(new_obj);
 			//segments_centers[segID].obj = &current_objects.back();
 		}
@@ -249,6 +249,7 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 	std::reverse(objects_to_del.begin(), objects_to_del.end());
 	for (auto& ind : objects_to_del)
 	{
+		algorithms.erase(algorithms.begin() + ind);
 		current_objects.erase(current_objects.begin() + ind);
 	}
 	return objects_to_return;

@@ -7,6 +7,9 @@
 #include "../include/Kalman.hpp"
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/core/utility.hpp>
+#include <opencv2/tracking.hpp>
+#include <opencv2/videoio.hpp>
 
 #define str "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define pd 60
@@ -86,11 +89,14 @@ int main() {
 	double frame_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
 	double frame_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-	cv::VideoWriter out("../media/out111.avi",
+	cv::VideoWriter out("../media/out_detect.avi",
 		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
-	//ObjectTracker NewTracker(FLT_MAX, FLT_MAX);
 	ObjectTracker NewTracker(0.42, 0.42);  // (0.6, 0.25) (0.8, 0.8)
+	std::string trackingAlg = "KCF";
+	MultiTracker trackers;
+	std::vector<Ptr<Tracker> > algorithms;
+
 	auto solver = LineCrossesAndAreaIntrusionDetection();
 	auto drawer = Drawer();
 
@@ -110,6 +116,18 @@ int main() {
 			frame_counter++;
 			continue;
 		}
+		
+		if (frame_counter % 4 == 0)
+		{
+			std::vector<Object> tmpObjects;
+			std::vector<DetectionObject> detections = detector.getDetections(frame);
+			tmpObjects = turnToObject(detections, frame, ri);
+			objects = NewTracker.Track(tmpObjects, algorithms);
+
+			trackers.add(algorithms, frame, objects); // NOT OBJECTS, BUT RECTANGLES (vector<Rect2D>);
+		}
+		trackers.update(frame);
+		
 		/*std::vector<DetectionObject> detections = detector.getDetections(frame);
 
 		std::vector<Object> objects;
@@ -118,7 +136,7 @@ int main() {
 		////tracking
 
 		objects = NewTracker.Track(objects);
-		*/
+		
 		if ((frame_counter % 3) == 0 || objects.size() == 0)
 		{
 			//std::vector<Object> objects;
@@ -139,7 +157,7 @@ int main() {
 			{
 				obj.trajectory.push_back(kalman(obj.x, obj.P, obj.trajectory.back().x, obj.trajectory.back().y, R));
 			}
-		}
+		}*/
 		////check
 		solver.checkAreaIntrusion(areas, objects);
 		solver.checkLineCrosses(boundaryLines, objects);
