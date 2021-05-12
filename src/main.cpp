@@ -76,6 +76,7 @@ std::vector<cv::Rect2d> get_rectangles(const std::vector<Object>& objects)
 		cv::Rect2d rect(obj.pos[0], obj.pos[1]);
 		rectangles.push_back(rect);
 	}
+	return rectangles;
 }
 
 int main() {
