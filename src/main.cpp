@@ -100,11 +100,11 @@ int main() {
 	double frame_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
 	double frame_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-	cv::VideoWriter out("../media/out_detect.avi",
+	cv::VideoWriter out("../media/out_new.avi",
 		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
 	ObjectTracker NewTracker(0.42, 0.42);  // (0.6, 0.25) (0.8, 0.8)
-	std::string trackingAlg = "KCF";
+	std::string trackingAlg = "MIL";
 	cv::legacy::MultiTracker trackers;
 	std::vector<cv::Ptr<cv::legacy::Tracker> > algorithms;
 
@@ -128,14 +128,15 @@ int main() {
 			continue;
 		}
 		
-		if (frame_counter % 4 == 0)
+		if (frame_counter % 4 == 0 || frame_counter < 3)
 		{
 			std::vector<Object> tmpObjects;
 			std::vector<DetectionObject> detections = detector.getDetections(frame);
 			tmpObjects = turnToObject(detections, frame, ri);
 			std::vector<cv::Ptr<cv::legacy::Tracker>> algorithms;
 			objects = NewTracker.Track(tmpObjects, algorithms);
-			trackers.add(algorithms, cv::InputArray(frame), get_rectangles(objects)); // NOT OBJECTS, BUT RECTANGLES (vector<Rect2D>);
+			if (!algorithms.empty())
+				trackers.add(algorithms, cv::InputArray(frame), get_rectangles(objects)); // NOT OBJECTS, BUT RECTANGLES (vector<Rect2D>);
 		}
 		trackers.update(frame);
 		

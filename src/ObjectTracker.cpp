@@ -10,7 +10,7 @@ std::vector<std::string> trackerTypes = {"MIL", "KCF", "TLD", "MEDIANFLOW", "GOT
 // create tracker by name
 Ptr<legacy::Tracker> createTrackerByName(std::string trackerType)
 {
-    Ptr<legacy::Tracker> tracker = legacy::TrackerKCF::create();
+    Ptr<legacy::Tracker> tracker = legacy::TrackerMIL::create();
     return tracker;
 }
 
