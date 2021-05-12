@@ -68,6 +68,16 @@ std::vector<Object> turnToObject(std::vector<DetectionObject>& detections, cv::M
 }
 
 
+std::vector<cv::Rect2d> get_rectangles(const std::vector<Object>& objects)
+{
+	std::vector<cv::Rect2d> rectangles;
+	for (auto obj : objects)
+	{
+		cv::Rect2d rect(obj.pos[0], obj.pos[1]);
+		rectangles.push_back(rect);
+	}
+}
+
 int main() {
 	InferenceEngine::Core ie;
 	InferenceEngine::Core reid_ie;
@@ -124,7 +134,8 @@ int main() {
 			tmpObjects = turnToObject(detections, frame, ri);
 			objects = NewTracker.Track(tmpObjects, algorithms);
 
-			trackers.add(algorithms, frame, objects); // NOT OBJECTS, BUT RECTANGLES (vector<Rect2D>);
+			//trackers.add(algorithms, frame, objects); // NOT OBJECTS, BUT RECTANGLES (vector<Rect2D>);
+			trackers.add(algorithms, frame, get_rectangles(objects));
 		}
 		trackers.update(frame);
 		
