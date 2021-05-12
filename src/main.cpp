@@ -133,6 +133,7 @@ int main() {
 			std::vector<Object> tmpObjects;
 			std::vector<DetectionObject> detections = detector.getDetections(frame);
 			tmpObjects = turnToObject(detections, frame, ri);
+			std::vector<cv::Ptr<cv::legacy::Tracker>> algorithms;
 			objects = NewTracker.Track(tmpObjects, algorithms);
 			trackers.add(algorithms, cv::InputArray(frame), get_rectangles(objects)); // NOT OBJECTS, BUT RECTANGLES (vector<Rect2D>);
 		}

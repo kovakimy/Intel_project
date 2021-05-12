@@ -130,7 +130,7 @@ float dist_norm(const Point& prev_center, const Point& curr_center) {
 }
 
 
-std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vector<Ptr<legacy::Tracker>>& algorithms) {//(vector<pair<Point, Point>> &segments) {
+std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vector<Ptr<legacy::Tracker>>& new_algorithms) {//(vector<pair<Point, Point>> &segments) {
 	std::vector<Point> segments_centers;
 	/*
 	for (auto& seg : segments)
@@ -139,7 +139,7 @@ std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vec
 		double y = (seg.pos[0].y + seg.pos[1].y) / 2;
 		segments_centers.push_back(Point(x, y));
 	}*/
-    std::string trackerType = "KCF";
+	std::string trackerType = "KCF";
 	float max_item = 0;
 	int size = current_objects.size() + segments.size();
 	float item = 0;
@@ -248,7 +248,7 @@ std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vec
 			//cout << objID << "new one" << " with ID: " << next_id << endl;
 			next_id++;
 			current_objects.push_back(new_obj);
-			algorithms.push_back(createTrackerByName(trackerType));
+			new_algorithms.push_back(createTrackerByName(trackerType));
 			//objects_to_return.push_back(new_obj);
 			//segments_centers[segID].obj = &current_objects.back();
 		}
@@ -259,7 +259,7 @@ std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vec
 	std::reverse(objects_to_del.begin(), objects_to_del.end());
 	for (auto& ind : objects_to_del)
 	{
-		algorithms.erase(algorithms.begin() + ind);
+	//	algorithms.erase(algorithms.begin() + ind);
 		current_objects.erase(current_objects.begin() + ind);
 	}
 	return objects_to_return;
