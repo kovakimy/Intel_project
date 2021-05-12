@@ -9,6 +9,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/core/utility.hpp>
 #include <opencv2/tracking.hpp>
+#include <opencv2/tracking/tracking_legacy.hpp>
 #include <opencv2/videoio.hpp>
 
 #define str "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
@@ -67,6 +68,16 @@ std::vector<Object> turnToObject(std::vector<DetectionObject>& detections, cv::M
 	return Objects;
 }
 
+std::vector<cv::Rect2d> get_rectangles(const std::vector<Object>& objects)
+{
+    std::vector<cv::Rect2d> rectangles;
+    for (auto obj : objects)
+    {
+        cv::Rect2d rect(obj.pos[0], obj.pos[1]);
+        rectangles.push_back(rect);
+    }
+    return rectangles;
+}
 
 int main() {
 	InferenceEngine::Core ie;
@@ -94,8 +105,8 @@ int main() {
 
 	ObjectTracker NewTracker(0.42, 0.42);  // (0.6, 0.25) (0.8, 0.8)
 	std::string trackingAlg = "KCF";
-	MultiTracker trackers;
-	std::vector<Ptr<Tracker> > algorithms;
+	cv::legacy::MultiTracker trackers;
+	std::vector<cv::Ptr<cv::Tracker> > algorithms;
 
 	auto solver = LineCrossesAndAreaIntrusionDetection();
 	auto drawer = Drawer();
@@ -123,8 +134,8 @@ int main() {
 			std::vector<DetectionObject> detections = detector.getDetections(frame);
 			tmpObjects = turnToObject(detections, frame, ri);
 			objects = NewTracker.Track(tmpObjects, algorithms);
-
-			trackers.add(algorithms, frame, objects); // NOT OBJECTS, BUT RECTANGLES (vector<Rect2D>);
+            std::vector<cv::Rect2d> rects_from_objects;
+			//trackers.add(algorithms, cv::InputArray(frame), get_rectangles(objects)); // NOT OBJECTS, BUT RECTANGLES (vector<Rect2D>);
 		}
 		trackers.update(frame);
 		

@@ -1,8 +1,18 @@
 ﻿#include "../include/ObjectTracker.hpp"
+#include <opencv2/tracking/tracking_legacy.hpp>
+
 
 using namespace cv;
 
+std::vector<std::string> trackerTypes = {"MIL", "KCF", "TLD", "MEDIANFLOW", "GOTURN", "MOSSE", "CSRT"};
+
 // functions
+// create tracker by name
+Ptr<Tracker> createTrackerByName(std::string trackerType)
+{
+    Ptr<Tracker> tracker = TrackerKCF::create();
+    return tracker;
+}
 
 static float cosineSimilarity(const std::vector<float>& A, const std::vector<float>& B) {
 	size_t size = A.size();
@@ -129,7 +139,7 @@ std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vec
 		double y = (seg.pos[0].y + seg.pos[1].y) / 2;
 		segments_centers.push_back(Point(x, y));
 	}*/
-
+    std::string trackerType = "KCF";
 	float max_item = 0;
 	int size = current_objects.size() + segments.size();
 	float item = 0;
@@ -238,7 +248,7 @@ std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vec
 			//cout << objID << "new one" << " with ID: " << next_id << endl;
 			next_id++;
 			current_objects.push_back(new_obj);
-			algorithms.push_back(createTrackerByName(trackingAlg));
+			algorithms.push_back(createTrackerByName(trackerType));
 			//objects_to_return.push_back(new_obj);
 			//segments_centers[segID].obj = &current_objects.back();
 		}

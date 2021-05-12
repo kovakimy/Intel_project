@@ -19,7 +19,7 @@ Object::Object(std::vector<Point>& pos, std::vector<float>& feature, int id)
 Area::Area(std::vector<Point>& contour)
 	: contour(contour), count(0) {};
 
-BoundaryLine::BoundaryLine(Point& p0, Point& p1) {
+BoundaryLine::BoundaryLine(const Point& p0, const Point& p1) {
 	this->p0 = p0;
 	this->p1 = p1;
 	color = Scalar(0, 255, 255);

@@ -28,7 +28,7 @@ struct Object {
 };
 
 struct BoundaryLine {
-	explicit BoundaryLine(cv::Point& p0, cv::Point& p1);
+	explicit BoundaryLine(const cv::Point& p0, const cv::Point& p1);
 
 	cv::Point p0;
 	cv::Point p1;
