@@ -106,7 +106,7 @@ int main() {
 	ObjectTracker NewTracker(0.42, 0.42);  // (0.6, 0.25) (0.8, 0.8)
 	std::string trackingAlg = "KCF";
 	cv::legacy::MultiTracker trackers;
-	std::vector<cv::Ptr<cv::Tracker> > algorithms;
+	std::vector<cv::Ptr<cv::legacy::Tracker> > algorithms;
 
 	auto solver = LineCrossesAndAreaIntrusionDetection();
 	auto drawer = Drawer();
@@ -134,8 +134,7 @@ int main() {
 			std::vector<DetectionObject> detections = detector.getDetections(frame);
 			tmpObjects = turnToObject(detections, frame, ri);
 			objects = NewTracker.Track(tmpObjects, algorithms);
-            std::vector<cv::Rect2d> rects_from_objects;
-			//trackers.add(algorithms, cv::InputArray(frame), get_rectangles(objects)); // NOT OBJECTS, BUT RECTANGLES (vector<Rect2D>);
+			trackers.add(algorithms, cv::InputArray(frame), get_rectangles(objects)); // NOT OBJECTS, BUT RECTANGLES (vector<Rect2D>);
 		}
 		trackers.update(frame);
 		

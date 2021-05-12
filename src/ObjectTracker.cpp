@@ -8,9 +8,9 @@ std::vector<std::string> trackerTypes = {"MIL", "KCF", "TLD", "MEDIANFLOW", "GOT
 
 // functions
 // create tracker by name
-Ptr<Tracker> createTrackerByName(std::string trackerType)
+Ptr<legacy::Tracker> createTrackerByName(std::string trackerType)
 {
-    Ptr<Tracker> tracker = TrackerKCF::create();
+    Ptr<legacy::Tracker> tracker = legacy::TrackerKCF::create();
     return tracker;
 }
 
@@ -130,7 +130,7 @@ float dist_norm(const Point& prev_center, const Point& curr_center) {
 }
 
 
-std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vector<Ptr<Tracker>>& algorithms) {//(vector<pair<Point, Point>> &segments) {
+std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vector<Ptr<legacy::Tracker>>& algorithms) {//(vector<pair<Point, Point>> &segments) {
 	std::vector<Point> segments_centers;
 	/*
 	for (auto& seg : segments)
