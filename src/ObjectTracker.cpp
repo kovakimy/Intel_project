@@ -5,7 +5,23 @@
 using namespace cv;
 
 std::vector<std::string> trackerTypes = {"MIL", "KCF", "TLD", "MEDIANFLOW", "GOTURN", "MOSSE", "CSRT"};
-
+cv::Rect2d get_rectangle(Object& obj)
+{
+	std::vector<cv::Rect2d> rectangles;
+	cv::Rect2d rect(obj.pos[0], obj.pos[1]);
+	
+	return rect;
+}
+static std::vector<cv::Rect2d> get_rectangles(const std::vector<Object>& objects)
+{
+	std::vector<cv::Rect2d> rectangles;
+	for (auto obj : objects)
+	{
+		cv::Rect2d rect(obj.pos[0], obj.pos[1]);
+		rectangles.push_back(rect);
+	}
+	return rectangles;
+}
 // functions
 // create tracker by name
 Ptr<legacy::Tracker> createTrackerByName(std::string trackerType)
@@ -111,7 +127,7 @@ static std::vector<int> HungarianAlgorithm(std::vector<std::vector<T>> g)
 ObjectTracker::ObjectTracker(float not_found_segment_cost,
 	float not_found_object_cost) :
 	E_t(not_found_segment_cost / 2.), E_s(not_found_object_cost / 2.) {
-
+	trackers = new cv::legacy::MultiTracker;
 }
 
 
@@ -130,7 +146,8 @@ float dist_norm(const Point& prev_center, const Point& curr_center) {
 }
 
 
-std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vector<Ptr<legacy::Tracker>>& algorithms) {//(vector<pair<Point, Point>> &segments) {
+std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, cv::Mat &frame) {//(vector<pair<Point, Point>> &segments) {
+	trackers->update(frame);
 	std::vector<Point> segments_centers;
 	/*
 	for (auto& seg : segments)
@@ -224,11 +241,15 @@ std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vec
 			//cout << objID << " <-> " << segID << " with ID: " << current_objects[objID].id << endl;
 			current_objects[objID].pos = segments[segID].pos;
 			current_objects[objID].feature = segments[segID].feature;
-			Point center((segments[segID].pos[0].x + segments[segID].pos[1].x) / 2,
-				(segments[segID].pos[0].y + segments[segID].pos[1].y) / 2);
+			//Point center((segments[segID].pos[0].x + segments[segID].pos[1].x) / 2,
+			//	(segments[segID].pos[0].y + segments[segID].pos[1].y) / 2);
+			auto boxes = trackers->getObjects();
+			auto box = boxes[objID];
+			Point center(box.x + (box.width) / 2, box.y +(box.height) / 2);
+			current_objects[objID].pos = { Point(box.x, box.y) , Point(box.x + box.width, box.y + box.height) };
 			current_objects[objID].TrackerCounter = 0;
 			current_objects[objID].trajectory.push_back(center);
-			objects_to_return.push_back(current_objects[objID]);
+			//objects_to_return.push_back(current_objects[objID]);
 		}
 
 		// if not found any segment for �urrent object :
@@ -248,8 +269,9 @@ std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vec
 			//cout << objID << "new one" << " with ID: " << next_id << endl;
 			next_id++;
 			current_objects.push_back(new_obj);
+			trackers->add(createTrackerByName(trackerType), cv::InputArray(frame), get_rectangle(new_obj));
 			algorithms.push_back(createTrackerByName(trackerType));
-			//objects_to_return.push_back(new_obj);
+			objects_to_return.push_back(new_obj);
 			//segments_centers[segID].obj = &current_objects.back();
 		}
 	}
@@ -261,6 +283,11 @@ std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, std::vec
 	{
 		algorithms.erase(algorithms.begin() + ind);
 		current_objects.erase(current_objects.begin() + ind);
+	}
+	if (objects_to_del.size() > 0)
+	{
+		trackers = new cv::legacy::MultiTracker;
+		trackers->add(algorithms, cv::InputArray(frame), get_rectangles(current_objects));
 	}
 	return objects_to_return;
 }

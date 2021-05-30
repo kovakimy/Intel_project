@@ -105,8 +105,8 @@ int main() {
 
 	ObjectTracker NewTracker(0.42, 0.42);  // (0.6, 0.25) (0.8, 0.8)
 	std::string trackingAlg = "KCF";
-	cv::legacy::MultiTracker trackers;
-	std::vector<cv::Ptr<cv::legacy::Tracker> > algorithms;
+	
+	
 
 	auto solver = LineCrossesAndAreaIntrusionDetection();
 	auto drawer = Drawer();
@@ -117,6 +117,7 @@ int main() {
 	std::vector<BoundaryLine> boundaryLines = { BoundaryLine(cv::Point(217, 40), cv::Point(50,400)), BoundaryLine(cv::Point(440, 40), cv::Point(700,400)) };
 
 	std::cout << "Progress bar..." << std::endl;
+	std::vector<Object> new_objects;
 	std::vector<Object> objects;
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
 	{
@@ -133,10 +134,14 @@ int main() {
 			std::vector<Object> tmpObjects;
 			std::vector<DetectionObject> detections = detector.getDetections(frame);
 			tmpObjects = turnToObject(detections, frame, ri);
-			objects = NewTracker.Track(tmpObjects, algorithms);
-			trackers.add(algorithms, cv::InputArray(frame), get_rectangles(objects)); // NOT OBJECTS, BUT RECTANGLES (vector<Rect2D>);
+			new_objects = NewTracker.Track(tmpObjects, frame);
 		}
-		trackers.update(frame);
+		else
+		{
+			NewTracker.Track(NewTracker.getCurrentObjects(), frame);
+			objects = NewTracker.getCurrentObjects();
+		}
+		
 		
 		/*std::vector<DetectionObject> detections = detector.getDetections(frame);
 
@@ -174,6 +179,8 @@ int main() {
 
 		////drawing
 		drawer.drawBboxWithId(frame, objects);
+		//imshow("Display window", frame);
+		//cv::waitKey(0);
 		drawer.drawTrajectory(frame, objects);
 		drawer.drawBoundaryLines(frame, boundaryLines);
 		drawer.drawAreas(frame, areas);
@@ -181,8 +188,7 @@ int main() {
 		out.write(frame);
 		//	if (detections.size() > 2) {
 		//	cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);// Create a window for display.
-		 //   imshow("Display window", frame);
-		//    cv::waitKey(0);
+	    
 		//	}
 		frame_counter++;
 		capture >> frame;
