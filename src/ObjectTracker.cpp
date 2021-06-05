@@ -120,8 +120,39 @@ float dist_norm(const Point& prev_center, const Point& curr_center) {
 	return 1. - returned_value;
 }
 
+vector<Object> ObjectTracker::Predict() {
+	vector<Object> objects_to_return;
+	for (auto& obj : current_objects) {
+		cv::Point2i tmp = (0, 0);
+		cv::Point2i ttmp;
+		if (obj.trajectory.size() > 1) {
+			for (size_t i = 1; i < obj.trajectory.size(); ++i) {
+				tmp += obj.trajectory[i] - obj.trajectory[i - 1];
+			}
+			int tot = 1;
+			if (obj.trajectory.size() == 2) tot = 4;
+			tmp.x = (int)(tmp.x / (int)(obj.trajectory.size() - 1)) / tot;
+			tmp.y = (int)(tmp.y / (int)(obj.trajectory.size() - 1)) / tot;
+			auto ttmp = obj.trajectory[obj.trajectory.size() - 1] + tmp;
+			obj.pos[0] += tmp;
+			obj.pos[1] += tmp;
+			obj.trajectory.push_back(ttmp);
+		}
+	
+	
+		//	if (ttmp.x > -1500 && ttmp.y > -1500 && ttmp.x<1500 && ttmp.y < 1500) {
+			//	obj.trajectory.push_back(ttmp);
+				objects_to_return.push_back(obj);
+			//}
+		}
+		//objects_to_return.push_back(obj);
+	return objects_to_return;
+}
 
-vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Point, Point>> &segments) {
+vector<Object> ObjectTracker::Track(vector<Object>& segments, bool predict) {//(vector<pair<Point, Point>> &segments) {
+	if (predict) 
+		return Predict();
+	
 	vector<Point> segments_centers;
 	/*
 	for (auto& seg : segments)
@@ -227,7 +258,7 @@ vector<Object> ObjectTracker::Track(vector<Object>& segments) {//(vector<pair<Po
 		{
 			//cout << objID << " no segments for that" << " with ID: " << current_objects[objID].id << endl;
 			current_objects[objID].TrackerCounter++;
-			if (current_objects[objID].TrackerCounter >= 7)
+			if (current_objects[objID].TrackerCounter >= max_not_found_time)
 			{
 				objects_to_del.push_back(objID);
 				break;

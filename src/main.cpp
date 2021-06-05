@@ -69,7 +69,7 @@ int main() {
 	InferenceEngine::Core reid_ie;
 	std::string FLAGS_m = "../models/person-detection-0202.xml";
 	std::string FLAGS_c = "../models/person-detection-0202.bin";
-	std::string FLAGS_v = "../media/people-detection.mp4";
+	std::string FLAGS_v = "../media/pd2.mp4";
 	std::string FLAGS_mReidentification = "../models/person-reidentification-retail-0286.xml";
 	std::string FLAGS_cReidentification = "../models/person-reidentification-retail-0286.bin";
 
@@ -84,18 +84,18 @@ int main() {
 	double frame_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
 	double frame_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-	cv::VideoWriter out("../media/out11.avi",
+	cv::VideoWriter out("../media/out123.avi",
 		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 
 	//ObjectTracker NewTracker(FLT_MAX, FLT_MAX);
-	ObjectTracker NewTracker(0.42, 0.42);  // (0.6, 0.25) (0.8, 0.8)
+	ObjectTracker NewTracker(0.39, 0.39);  // (0.6, 0.25) (0.8, 0.8)
 	auto solver = LineCrossesAndAreaIntrusionDetection();
 	auto drawer = Drawer();
 
 	std::vector<cv::Point> contour = { cv::Point(200, 200), cv::Point(500, 180), cv::Point(600, 400), cv::Point(300, 300), cv::Point(100, 360) };
 	std::vector<Area> areas = { Area(contour) };
 
-	std::vector<BoundaryLine> boundaryLines = { BoundaryLine(cv::Point(217, 40), cv::Point(50,400)), BoundaryLine(cv::Point(440, 40), cv::Point(700,400)) };
+	std::vector<BoundaryLine> boundaryLines = { BoundaryLine(cv::Point(277, 40), cv::Point(50,400)), BoundaryLine(cv::Point(440, 40), cv::Point(700,400)) };
 
 	std::cout << "Progress bar..." << std::endl;
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
@@ -107,14 +107,19 @@ int main() {
 			frame_counter++;
 			continue;
 		}
-		std::vector<DetectionObject> detections = detector.getDetections(frame);
 		std::vector<Object> objects;
+		if (frame_counter % 1 == 0) {
+			std::vector<DetectionObject> detections = detector.getDetections(frame);
+			//std::vector<Object> objects;
+			
+			objects = turnToObject(detections, frame, ri);
+			////tracking
 
-		objects = turnToObject(detections, frame, ri);
-		////tracking
-
-		objects = NewTracker.Track(objects);
-
+			objects = NewTracker.Track(objects, false);
+		}
+		else {
+			objects = NewTracker.Track(objects, true);
+		}
 		////check
 		solver.checkAreaIntrusion(areas, objects);
 		solver.checkLineCrosses(boundaryLines, objects);
