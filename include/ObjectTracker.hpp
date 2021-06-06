@@ -16,8 +16,8 @@ private:
 	float E_t;
 	float E_s;
 	int next_id = 0;
-	int max_not_found_time = 1;
-	float similarityThreshold = 0.37;// The best value will be calculated later
+	int max_not_found_time = 5;
+	float similarityThreshold = 0.6;// The best value will be calculated later
 	std::vector<Object> current_objects;
 	std::vector<Object> prev_objects;
 	std::vector<Object> Predict();
