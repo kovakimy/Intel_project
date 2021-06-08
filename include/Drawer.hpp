@@ -4,7 +4,8 @@
 
 class Drawer {
 public:
-	explicit Drawer();
+	explicit Drawer(size_t numColors);
+	std::vector<cv::Scalar> colors;
 
 	void drawTrajectory(cv::Mat& frame, std::vector<Object>& objects);
 	void drawBboxWithId(cv::Mat& frame, std::vector<Object>& objects);

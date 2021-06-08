@@ -80,3 +80,16 @@ void callback(int event, int x, int y, int flag, void* userdata)
 		}	
 	}
 }
+
+std::vector<cv::Scalar> generateColors(size_t size) {
+	std::vector<cv::Scalar> colors;
+	std::random_device dev;
+	std::mt19937 range(dev());
+	std::uniform_int_distribution<std::mt19937::result_type> dist(0, 255);
+
+	for (size_t i = 0; i < size; ++i) {
+		colors.push_back(cv::Scalar(dist(range), dist(range), dist(range)));
+	}
+
+	return colors;
+}

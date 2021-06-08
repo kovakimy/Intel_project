@@ -63,7 +63,7 @@ std::vector<Object> turnToObject(std::vector<DetectionObject>& detections, cv::M
 }
 
 void setUpAreasAndBoundaryLines(cv::Mat& frame, size_t countAreas, size_t countLines, std::vector<Area>& areas, std::vector<BoundaryLine>& boundaryLines) {
-	Drawer drawer;
+	Drawer drawer(100);
 
 	for (size_t i = 0; i < countAreas; ++i) {
 		std::cout << "Select multiple points for the area " << i << " and press any key."<< std::endl;
@@ -121,7 +121,7 @@ int main() {
 	ObjectTracker NewTracker(0.42, 0.42);  // (0.6, 0.25) (0.8, 0.8)
 
 	LineCrossesAndAreaIntrusionDetection solver = LineCrossesAndAreaIntrusionDetection();
-	Drawer drawer = Drawer();
+	Drawer drawer = Drawer(100);
 
 	std::vector<Area> areas;
 	std::vector<BoundaryLine> boundaryLines;
@@ -140,7 +140,7 @@ int main() {
 	std::cout << "Progress bar..." << std::endl;
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
 	{
-		progressBar((frame_counter + 1) / capture.get(cv::CAP_PROP_FRAME_COUNT));
+		progressBar(2*(frame_counter + 1) / capture.get(cv::CAP_PROP_FRAME_COUNT));
 		capture >> frame;
 		if (frame.empty())
 		{

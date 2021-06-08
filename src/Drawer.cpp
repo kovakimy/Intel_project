@@ -1,6 +1,8 @@
 #include "../include/Drawer.hpp"
 
-Drawer::Drawer() {}
+Drawer::Drawer(size_t numColors) {
+	colors = generateColors(numColors);
+}
 
 void Drawer::drawTrajectory(cv::Mat& frame, std::vector<Object>& objects) {
 	for (auto& obj : objects) {
@@ -12,7 +14,7 @@ void Drawer::drawTrajectory(cv::Mat& frame, std::vector<Object>& objects) {
 void Drawer::drawBboxWithId(cv::Mat& frame, std::vector<Object>& objects) {
 	for (auto& obj : objects)
 	{
-		auto color = cv::Scalar((obj.id << 5 % 255) - 1, (obj.id << 6 % 255) - 1, (obj.id << 7 % 255) - 1);
+		cv::Scalar& color = colors[obj.id];
 		cv::putText(frame, std::to_string(obj.id), obj.pos[0] - cv::Point(5, 5), cv::FONT_HERSHEY_PLAIN, 2, color, 2);
 		cv::rectangle(frame, obj.pos[0], obj.pos[1], color, 2);
 	}
