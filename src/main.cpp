@@ -82,11 +82,11 @@ std::vector<cv::Rect2d> get_rectangles(const std::vector<Object>& objects)
 int main() {
 	InferenceEngine::Core ie;
 	InferenceEngine::Core reid_ie;
-	std::string FLAGS_m = "../models/person-detection-0202.xml";
-	std::string FLAGS_c = "../models/person-detection-0202.bin";
+	std::string FLAGS_m = "../models/person-detection-adas-0002.xml";
+	std::string FLAGS_c = "../models/person-detection-adas-0002.bin";
 	std::string FLAGS_v = "../media/people-detection.mp4";
-	std::string FLAGS_mReidentification = "../models/person-reidentification-retail-0286.xml";
-	std::string FLAGS_cReidentification = "../models/person-reidentification-retail-0286.bin";
+	std::string FLAGS_mReidentification = "../models/person-reidentification-retail-0288.xml";
+	std::string FLAGS_cReidentification = "../models/person-reidentification-retail-0288.bin";
 
 	Detector detector(FLAGS_m, FLAGS_c, ie);
 	ReidentificationNet ri(FLAGS_mReidentification, FLAGS_cReidentification, ie);
