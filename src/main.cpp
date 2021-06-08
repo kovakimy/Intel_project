@@ -1,4 +1,3 @@
-#include <iostream>
 #include "../include/ObjectDetector.hpp"
 #include "../include/ObjectTracker.hpp"
 #include "../include/ReidNetwork.hpp"
@@ -63,6 +62,35 @@ std::vector<Object> turnToObject(std::vector<DetectionObject>& detections, cv::M
 	return Objects;
 }
 
+void setUpAreasAndBoundaryLines(cv::Mat& frame, size_t countAreas, size_t countLines, std::vector<Area>& areas, std::vector<BoundaryLine>& boundaryLines) {
+	Drawer drawer;
+
+	for (size_t i = 0; i < countAreas; ++i) {
+		std::cout << "Select multiple points for the area " << i << " and press any key."<< std::endl;
+		Parameters params;
+		params.mode = 0; // => setting areas
+		cv::namedWindow("Setting up areas", 1);
+		cv::setMouseCallback("Setting up areas", callback, static_cast<void*>(&params));
+		cv::imshow("Setting up areas", frame);
+		cv::waitKey(0);
+		cv::destroyWindow("Setting up areas");
+		areas.push_back(Area(params.areaContour));
+		drawer.drawAreas(frame, areas);
+	}
+
+	for (size_t i = 0; i < countLines; ++i) {
+		std::cout << "Select 2 points for the boundary line " << i << " and press any key." << std::endl;
+		Parameters params;
+		params.mode = 1; // => setting lines
+		cv::namedWindow("Setting up boundary lines", 1);
+		cv::setMouseCallback("Setting up boundary lines", callback, static_cast<void*>(&params));
+		cv::imshow("Setting up boundary lines", frame);
+		cv::waitKey(0);
+		cv::destroyWindow("Setting up boundary lines");
+		boundaryLines.push_back(BoundaryLine(params.linePoints[0], params.linePoints[1]));
+		drawer.drawBoundaryLines(frame, boundaryLines);
+	}
+}
 
 int main() {
 	InferenceEngine::Core ie;
@@ -75,7 +103,9 @@ int main() {
 
 	Detector detector(FLAGS_m, FLAGS_c, ie);
 	ReidentificationNet ri(FLAGS_mReidentification, FLAGS_cReidentification, ie);
+	
 
+	int parameters_is_set_up = false;
 	int frame_counter = 1;
 	cv::Mat frame;
 	cv::Mat result;
@@ -89,13 +119,23 @@ int main() {
 
 	//ObjectTracker NewTracker(FLT_MAX, FLT_MAX);
 	ObjectTracker NewTracker(0.42, 0.42);  // (0.6, 0.25) (0.8, 0.8)
-	auto solver = LineCrossesAndAreaIntrusionDetection();
-	auto drawer = Drawer();
 
-	std::vector<cv::Point> contour = { cv::Point(200, 200), cv::Point(500, 180), cv::Point(600, 400), cv::Point(300, 300), cv::Point(100, 360) };
-	std::vector<Area> areas = { Area(contour) };
+	LineCrossesAndAreaIntrusionDetection solver = LineCrossesAndAreaIntrusionDetection();
+	Drawer drawer = Drawer();
 
-	std::vector<BoundaryLine> boundaryLines = { BoundaryLine(cv::Point(217, 40), cv::Point(50,400)), BoundaryLine(cv::Point(440, 40), cv::Point(700,400)) };
+	std::vector<Area> areas;
+	std::vector<BoundaryLine> boundaryLines;
+	size_t countAreas, countLines;
+	std::cout << "Input a number of areas: ";
+	std::cin >> countAreas;
+	std::cout << "Input a number of lines: ";
+	std::cin >> countLines;
+
+	capture >> frame;
+	if (!frame.empty()) {
+		setUpAreasAndBoundaryLines(frame, countAreas, countLines, areas, boundaryLines);
+		frame_counter++;
+	}
 
 	std::cout << "Progress bar..." << std::endl;
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
@@ -107,11 +147,12 @@ int main() {
 			frame_counter++;
 			continue;
 		}
+
 		std::vector<DetectionObject> detections = detector.getDetections(frame);
 		std::vector<Object> objects;
 
 		objects = turnToObject(detections, frame, ri);
-		////tracking
+		//tracking
 
 		objects = NewTracker.Track(objects);
 

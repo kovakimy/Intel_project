@@ -63,3 +63,20 @@ double computeAngle(const Point& p1, const Point& p2, const Point& p3, const Poi
 	
 	return vec1.cross(vec2) < 0 ? degreeAngle : 360 - degreeAngle;
 }
+
+
+void callback(int event, int x, int y, int flag, void* userdata)
+{
+	if (event == cv::EVENT_LBUTTONDOWN)
+	{
+		Parameters* params = static_cast<Parameters*>(userdata);
+		if (params->mode == 0) {
+			params->areaContour.push_back(cv::Point(x, y));
+			std::cout << "A point chosen for the area: (" << x << ", " << y << ")" << std::endl;
+		}
+		else if (params->mode == 1) {
+			params->linePoints.push_back(cv::Point(x, y));
+			std::cout << "A point chosen for the boundary line: (" << x << ", " << y << ")" << std::endl;
+		}	
+	}
+}

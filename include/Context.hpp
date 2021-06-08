@@ -6,6 +6,7 @@
 #include <vector>
 #include <chrono>
 #include <math.h>
+#include <iostream>
 
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/matx.hpp>
@@ -48,9 +49,17 @@ struct Area {
 	cv::Scalar color;
 };
 
+struct Parameters {
+	size_t mode;
+	std::vector<cv::Point> areaContour;
+	std::vector<cv::Point> linePoints;
+};
+
 inline cv::Point vectorize(const cv::Point& p1, const cv::Point& p2);
 inline bool onSegment(const cv::Point& p1, const cv::Point& p2, const cv::Point& p3);
 inline int direction(const cv::Point& p1, const cv::Point& p2, const cv::Point& p3);
 bool segmentsIntersect(const cv::Point& p1, const cv::Point& p2, const cv::Point& p3, const cv::Point& p4);
 
 double computeAngle(const cv::Point& p1, const cv::Point& p2, const cv::Point& p3, const cv::Point& p4);
+
+void callback(int event, int x, int y, int flag, void* userdata);
