@@ -4,7 +4,7 @@
 
 class Drawer {
 public:
-	explicit Drawer(size_t numColors);
+	explicit Drawer(size_t numColors = 300);
 	std::vector<cv::Scalar> colors;
 
 	void drawTrajectory(cv::Mat& frame, std::vector<Object>& objects);

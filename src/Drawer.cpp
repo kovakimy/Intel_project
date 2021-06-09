@@ -14,7 +14,7 @@ void Drawer::drawTrajectory(cv::Mat& frame, std::vector<Object>& objects) {
 void Drawer::drawBboxWithId(cv::Mat& frame, std::vector<Object>& objects) {
 	for (auto& obj : objects)
 	{
-		cv::Scalar& color = colors[obj.id];
+		cv::Scalar& color = colors[obj.id % colors.size()];
 		cv::putText(frame, std::to_string(obj.id), obj.pos[0] - cv::Point(5, 5), cv::FONT_HERSHEY_PLAIN, 2, color, 2);
 		cv::rectangle(frame, obj.pos[0], obj.pos[1], color, 2);
 	}

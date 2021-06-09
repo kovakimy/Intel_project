@@ -52,6 +52,8 @@ struct Area {
 
 struct Parameters {
 	size_t mode;
+	cv::Mat frame;
+	std::string windowName;
 	std::vector<cv::Point> areaContour;
 	std::vector<cv::Point> linePoints;
 };

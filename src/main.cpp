@@ -63,33 +63,42 @@ std::vector<Object> turnToObject(std::vector<DetectionObject>& detections, cv::M
 }
 
 void setUpAreasAndBoundaryLines(cv::Mat& frame, size_t countAreas, size_t countLines, std::vector<Area>& areas, std::vector<BoundaryLine>& boundaryLines) {
-	Drawer drawer(100);
+	Drawer drawer;
+	std::string areasWindowName = "Setting up areas",
+		linesWindowName = "Setting up boundary lines";
 
 	for (size_t i = 0; i < countAreas; ++i) {
 		std::cout << "Select multiple points for the area " << i << " and press any key."<< std::endl;
 		Parameters params;
 		params.mode = 0; // => setting areas
-		cv::namedWindow("Setting up areas", 1);
-		cv::setMouseCallback("Setting up areas", callback, static_cast<void*>(&params));
-		cv::imshow("Setting up areas", frame);
+		params.frame = frame;
+		params.windowName = areasWindowName;
+		cv::namedWindow(areasWindowName, 1);
+		cv::setMouseCallback(areasWindowName, callback, static_cast<void*>(&params));
+		cv::imshow(areasWindowName, frame);
 		cv::waitKey(0);
-		cv::destroyWindow("Setting up areas");
 		areas.push_back(Area(params.areaContour));
 		drawer.drawAreas(frame, areas);
 	}
+	cv::destroyWindow("Setting up areas");
 
 	for (size_t i = 0; i < countLines; ++i) {
 		std::cout << "Select 2 points for the boundary line " << i << " and press any key." << std::endl;
 		Parameters params;
 		params.mode = 1; // => setting lines
-		cv::namedWindow("Setting up boundary lines", 1);
-		cv::setMouseCallback("Setting up boundary lines", callback, static_cast<void*>(&params));
-		cv::imshow("Setting up boundary lines", frame);
+		params.frame = frame;
+		params.windowName = linesWindowName;
+		cv::namedWindow(linesWindowName, 1);
+		cv::setMouseCallback(linesWindowName, callback, static_cast<void*>(&params));
+		cv::imshow(linesWindowName, frame);
 		cv::waitKey(0);
-		cv::destroyWindow("Setting up boundary lines");
 		boundaryLines.push_back(BoundaryLine(params.linePoints[0], params.linePoints[1]));
 		drawer.drawBoundaryLines(frame, boundaryLines);
 	}
+	std::cout << "Press any key to start a demo." << std::endl;
+	cv::imshow(linesWindowName, frame);
+	cv::waitKey(0);
+	cv::destroyWindow("Setting up boundary lines");
 }
 
 int main() {
@@ -104,8 +113,6 @@ int main() {
 	Detector detector(FLAGS_m, FLAGS_c, ie);
 	ReidentificationNet ri(FLAGS_mReidentification, FLAGS_cReidentification, ie);
 	
-
-	int parameters_is_set_up = false;
 	int frame_counter = 1;
 	cv::Mat frame;
 	cv::Mat result;
@@ -121,7 +128,7 @@ int main() {
 	ObjectTracker NewTracker(0.42, 0.42);  // (0.6, 0.25) (0.8, 0.8)
 
 	LineCrossesAndAreaIntrusionDetection solver = LineCrossesAndAreaIntrusionDetection();
-	Drawer drawer = Drawer(100);
+	Drawer drawer;
 
 	std::vector<Area> areas;
 	std::vector<BoundaryLine> boundaryLines;

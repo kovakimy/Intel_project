@@ -71,11 +71,30 @@ void callback(int event, int x, int y, int flag, void* userdata)
 	{
 		Parameters* params = static_cast<Parameters*>(userdata);
 		if (params->mode == 0) {
-			params->areaContour.push_back(cv::Point(x, y));
+			cv::Point p(x, y);
+			params->areaContour.push_back(p);
+			size_t countourSize = params->areaContour.size();
+			if (countourSize > 1) {
+				cv::line(params->frame, params->areaContour[countourSize - 1], params->areaContour[countourSize - 2], cv::Scalar(0, 0, 255), 2);
+			}
+			else {
+				cv::circle(params->frame, p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
+			}
+			cv::imshow(params->windowName, params->frame);
 			std::cout << "A point chosen for the area: (" << x << ", " << y << ")" << std::endl;
 		}
 		else if (params->mode == 1) {
-			params->linePoints.push_back(cv::Point(x, y));
+			cv::Point p(x, y);
+			params->linePoints.push_back(p);
+			size_t numPoints = params->linePoints.size();
+			if (numPoints > 1) {
+				cv::line(params->frame, params->linePoints[numPoints - 1], params->linePoints[numPoints - 2], cv::Scalar(0, 0, 255), 2);
+			}
+			else {
+				cv::circle(params->frame, p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
+			}
+			cv::circle(params->frame, p, 1, cv::Scalar(0, 0, 255), cv::FILLED);
+			cv::imshow(params->windowName, params->frame);
 			std::cout << "A point chosen for the boundary line: (" << x << ", " << y << ")" << std::endl;
 		}	
 	}
