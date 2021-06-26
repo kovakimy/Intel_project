@@ -2,7 +2,7 @@
 #include <ie_core.hpp>
 #include <vector>
 #include <opencv2/core.hpp>
-
+#include <opencv2/tracking/tracking_by_matching.hpp>
 
 struct DetectionObject
 {
@@ -34,5 +34,5 @@ private:
 public:
     Detector(const std::string &, const std::string &, const InferenceEngine::Core&);
     void createRequest(const cv::Mat&);
-    std::vector<DetectionObject> getDetections(const cv::Mat &);
+    cv::detail::tracking::tbm::TrackedObjects getDetections(const cv::Mat &, int);
 };

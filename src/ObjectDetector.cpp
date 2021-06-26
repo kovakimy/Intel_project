@@ -1,6 +1,7 @@
 #include "../include/ObjectDetector.hpp"
 //#include <samples/ocv_common.hpp>
 
+
 static InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat& mat)
 {
     size_t channels = mat.channels();
@@ -57,12 +58,12 @@ void Detector::createRequest(const cv::Mat& image) {
 }
 
 
-std::vector<DetectionObject> Detector::getDetections(const cv::Mat &image)
+cv::detail::tracking::tbm::TrackedObjects Detector::getDetections(const cv::Mat &image, int frame_counter)
 {
     std::vector<DetectionObject> detectedObjects;
     float width_  = static_cast<float>(image.cols);
     float height_ = static_cast<float>(image.rows);
-
+    cv::detail::tracking::tbm::TrackedObjects res;
     createRequest(image);
 
     InferenceEngine::LockedMemory<const void> outMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(inferRequest.GetBlob(this->outName))->rmap();
@@ -78,11 +79,19 @@ std::vector<DetectionObject> Detector::getDetections(const cv::Mat &image)
         const double y0     = std::min(std::max(0.0f, data_[start_pos + 4]), 1.0f) * height_;
         const double x1     = std::min(std::max(0.0f, data_[start_pos + 5]), 1.0f) * width_;
         const double y1     = std::min(std::max(0.0f, data_[start_pos + 6]), 1.0f) * height_;
-	if (score > 0.5)
-	{
-            DetectionObject det(classID, score, x0, y0, x1, y1);
-            detectedObjects.push_back(det);
-	}
+        // check this
+        cv::Rect cur_rect(x0, y0, x1-x0, y1-y0);
+        cur_rect = cur_rect & cv::Rect(cv::Point(), image.size());
+        if (cur_rect.empty())
+            continue;
+	    if (score > 0.5)
+	    {
+            //DetectionObject det(classID, score, x0, y0, x1, y1);
+            //detectedObjects.push_back(det);
+            cv::detail::tracking::tbm::TrackedObject cur_obj(cur_rect, score, frame_counter, -1);
+            res.push_back(cur_obj);
+	    }
     }
-    return detectedObjects;
+    return res;
 }
+

@@ -10,7 +10,7 @@
 #include <opencv2/core/utility.hpp>
 #include <opencv2/tracking.hpp>
 #include <opencv2/videoio.hpp>
-#include <opencv2/tracking/tracking_legacy.hpp>
+//#include <opencv2/tracking/tracking_legacy.hpp>
 
 #pragma once
 
@@ -25,8 +25,8 @@ private:
 	float similarityThreshold = 0.55;// The best value will be calculated later
 	std::vector<Object> current_objects;
 	std::vector<Object> prev_objects;
-	cv::Ptr<cv::legacy::MultiTracker> trackers;
-	std::vector<cv::Ptr<cv::legacy::Tracker> > algorithms;
+	//cv::Ptr<cv::legacy::MultiTracker> trackers;
+	//std::vector<cv::Ptr<cv::legacy::Tracker> > algorithms;
 	//void Predict();
 public:
 	std::vector<Object> getCurrentObjects()

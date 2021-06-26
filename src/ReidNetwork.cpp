@@ -118,13 +118,26 @@ const float* ReidentificationNet::getResults() {
 	return output_buffer;
 	};
 
-std::vector<float> ReidentificationNet::doEverything(const cv::Mat& picPart) {
+//std::vector<float> ReidentificationNet::doEverything(const cv::Mat& picPart) {
+//	this->createRequest(picPart);
+//	this->submitRequest(false);
+//	auto vectorData = this->getResults();
+//	vector<float> resVector(256);
+//	for (size_t i = 0; i < 256; ++i) {
+//		resVector[i]=vectorData[i];
+//	}
+//	return resVector;
+//};
+
+cv::Mat ReidentificationNet::doEverything(const cv::Mat& picPart) {
 	this->createRequest(picPart);
 	this->submitRequest(false);
 	auto vectorData = this->getResults();
+	
 	vector<float> resVector(256);
 	for (size_t i = 0; i < 256; ++i) {
-		resVector[i]=vectorData[i];
+		resVector[i] = vectorData[i];
 	}
-	return resVector;
-};
+	cv::Mat descr = cv::Mat(resVector);
+	return descr;
+}

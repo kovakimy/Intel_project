@@ -127,7 +127,7 @@ static std::vector<int> HungarianAlgorithm(std::vector<std::vector<T>> g)
 ObjectTracker::ObjectTracker(float not_found_segment_cost,
 	float not_found_object_cost) :
 	E_t(not_found_segment_cost / 2.), E_s(not_found_object_cost / 2.) {
-	trackers = new cv::legacy::MultiTracker;
+	//trackers = new cv::legacy::MultiTracker;
 }
 
 
@@ -147,7 +147,7 @@ float dist_norm(const Point& prev_center, const Point& curr_center) {
 
 
 std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, cv::Mat &frame) {//(vector<pair<Point, Point>> &segments) {
-	trackers->update(frame);
+	//trackers->update(frame);
 	std::vector<Point> segments_centers;
 	/*
 	for (auto& seg : segments)
@@ -243,12 +243,12 @@ std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, cv::Mat 
 			current_objects[objID].feature = segments[segID].feature;
 			//Point center((segments[segID].pos[0].x + segments[segID].pos[1].x) / 2,
 			//	(segments[segID].pos[0].y + segments[segID].pos[1].y) / 2);
-			auto boxes = trackers->getObjects();
-			auto box = boxes[objID];
-			Point center(box.x + (box.width) / 2, box.y +(box.height) / 2);
-			current_objects[objID].pos = { Point(box.x, box.y) , Point(box.x + box.width, box.y + box.height) };
+			//auto boxes = trackers->getObjects();
+			//auto box = boxes[objID];
+			//Point center(box.x + (box.width) / 2, box.y +(box.height) / 2);
+			//current_objects[objID].pos = { Point(box.x, box.y) , Point(box.x + box.width, box.y + box.height) };
 			current_objects[objID].TrackerCounter = 0;
-			current_objects[objID].trajectory.push_back(center);
+			//current_objects[objID].trajectory.push_back(center);
 			//objects_to_return.push_back(current_objects[objID]);
 		}
 
@@ -269,8 +269,8 @@ std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, cv::Mat 
 			//cout << objID << "new one" << " with ID: " << next_id << endl;
 			next_id++;
 			current_objects.push_back(new_obj);
-			trackers->add(createTrackerByName(trackerType), cv::InputArray(frame), get_rectangle(new_obj));
-			algorithms.push_back(createTrackerByName(trackerType));
+			//trackers->add(createTrackerByName(trackerType), cv::InputArray(frame), get_rectangle(new_obj));
+			//algorithms.push_back(createTrackerByName(trackerType));
 			objects_to_return.push_back(new_obj);
 			//segments_centers[segID].obj = &current_objects.back();
 		}
@@ -281,13 +281,13 @@ std::vector<Object> ObjectTracker::Track(std::vector<Object>& segments, cv::Mat 
 	std::reverse(objects_to_del.begin(), objects_to_del.end());
 	for (auto& ind : objects_to_del)
 	{
-		algorithms.erase(algorithms.begin() + ind);
+		//algorithms.erase(algorithms.begin() + ind);
 		current_objects.erase(current_objects.begin() + ind);
 	}
 	if (objects_to_del.size() > 0)
 	{
-		trackers = new cv::legacy::MultiTracker;
-		trackers->add(algorithms, cv::InputArray(frame), get_rectangles(current_objects));
+		//trackers = new cv::legacy::MultiTracker;
+		//trackers->add(algorithms, cv::InputArray(frame), get_rectangles(current_objects));
 	}
 	return objects_to_return;
 }

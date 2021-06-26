@@ -47,7 +47,8 @@ public:
 
     void submitRequest(bool isAsync);
 
-    std::vector<float> doEverything(const cv::Mat&);
+    //std::vector<float> doEverything(const cv::Mat&);
+    cv::Mat doEverything(const cv::Mat&);
 
     const float* getResults();
 };
