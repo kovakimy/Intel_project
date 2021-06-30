@@ -1,4 +1,3 @@
-#include <iostream>
 #include "../include/ObjectDetector.hpp"
 #include "../include/ObjectTracker.hpp"
 #include "../include/ReidNetwork.hpp"
@@ -117,11 +116,49 @@ cv::Ptr<cv::detail::tracking::tbm::ITrackerByMatching> createTrackerByMatchingWi
 	return tracker;
 }
 
+void setUpAreasAndBoundaryLines(cv::Mat& frame, size_t countAreas, size_t countLines, std::vector<Area>& areas, std::vector<BoundaryLine>& boundaryLines) {
+	Drawer drawer;
+	std::string areasWindowName = "Setting up areas",
+		linesWindowName = "Setting up boundary lines";
+
+	for (size_t i = 0; i < countAreas; ++i) {
+		std::cout << "Select multiple points for the area " << i << " and press any key."<< std::endl;
+		Parameters params;
+		params.mode = 0; // => setting areas
+		params.frame = frame;
+		params.windowName = areasWindowName;
+		cv::namedWindow(areasWindowName, 1);
+		cv::setMouseCallback(areasWindowName, callback, static_cast<void*>(&params));
+		cv::imshow(areasWindowName, frame);
+		cv::waitKey(0);
+		areas.push_back(Area(params.areaContour));
+		drawer.drawAreas(frame, areas);
+	}
+	cv::destroyWindow("Setting up areas");
+
+	for (size_t i = 0; i < countLines; ++i) {
+		std::cout << "Select 2 points for the boundary line " << i << " and press any key." << std::endl;
+		Parameters params;
+		params.mode = 1; // => setting lines
+		params.frame = frame;
+		params.windowName = linesWindowName;
+		cv::namedWindow(linesWindowName, 1);
+		cv::setMouseCallback(linesWindowName, callback, static_cast<void*>(&params));
+		cv::imshow(linesWindowName, frame);
+		cv::waitKey(0);
+		boundaryLines.push_back(BoundaryLine(params.linePoints[0], params.linePoints[1]));
+		drawer.drawBoundaryLines(frame, boundaryLines);
+	}
+	std::cout << "Press any key to start a demo." << std::endl;
+	cv::imshow(linesWindowName, frame);
+	cv::waitKey(0);
+	cv::destroyWindow("Setting up boundary lines");
+}
+
 int main() {
 	std::string FLAGS_m = "C:\\Users\\chris3898\\Intel_project\\models\\person-detection-0202.xml";
 	std::string FLAGS_c = "C:\\Users\\chris3898\\Intel_project\\models\\person-detection-0202.bin";
 	std::string FLAGS_v = "C:\\Users\\chris3898\\Intel_project\\media\\people-detection.mp4";
-	
 
 	Detector detector(FLAGS_m, FLAGS_c, ie);
 
@@ -139,21 +176,32 @@ int main() {
 	
 	cv::Ptr<cv::detail::tracking::tbm::ITrackerByMatching> tracker = createTrackerByMatchingWithStrongDescriptor();
 
-	auto solver = LineCrossesAndAreaIntrusionDetection();
-	auto drawer = Drawer();
-
-	std::vector<cv::Point> contour = { cv::Point(200, 200), cv::Point(500, 180), cv::Point(600, 400), cv::Point(300, 300), cv::Point(100, 360) };
-	std::vector<Area> areas = { Area(contour) };
 	int frame_step = 3;
-	std::vector<BoundaryLine> boundaryLines = { BoundaryLine(cv::Point(217, 40), cv::Point(50,400)), BoundaryLine(cv::Point(440, 40), cv::Point(700,400)) };
 	int64 time_total = 0;
+
+	LineCrossesAndAreaIntrusionDetection solver = LineCrossesAndAreaIntrusionDetection();
+	Drawer drawer;
+	std::vector<Area> areas;
+	std::vector<BoundaryLine> boundaryLines;
+	size_t countAreas, countLines;
+	std::cout << "Input a number of areas: ";
+	std::cin >> countAreas;
+	std::cout << "Input a number of lines: ";
+	std::cin >> countLines;
+
+	capture >> frame;
+	if (!frame.empty()) {
+		setUpAreasAndBoundaryLines(frame, countAreas, countLines, areas, boundaryLines);
+		frame_counter++;
+	}
+
 	std::cout << "Progress bar..." << std::endl;
 	std::vector<Object> new_objects;
 	std::vector<Object> objects;
 	cv::detail::tracking::tbm::TrackedObjects detections;
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
 	{
-		progressBar((frame_counter + 1) / capture.get(cv::CAP_PROP_FRAME_COUNT));
+		progressBar(2*(frame_counter + 1) / capture.get(cv::CAP_PROP_FRAME_COUNT));
 		capture >> frame;
 		if (frame.empty())
 		{
@@ -180,7 +228,6 @@ int main() {
 		// Drawing colored "worms" (tracks).
 		frame = tracker->drawActiveTracks(frame);
 
-
 		// Drawing all detected objects on a frame by BLUE COLOR
 		for (const auto& detection : detections) {
 			cv::rectangle(frame, detection.rect, cv::Scalar(255, 0, 0), 3);
@@ -199,7 +246,7 @@ int main() {
 		
 		////check
 		solver.checkAreaIntrusion(areas, objects);
-		//solver.checkLineCrosses(boundaryLines, objects);
+		solver.checkLineCrosses(boundaryLines, objects);
 
 		////drawing
 		drawer.drawBboxWithId(frame, objects);
@@ -209,7 +256,6 @@ int main() {
 		drawer.drawAreas(frame, areas);
 
 		out.write(frame);
-
 	}
 	double s = frame_counter / (time_total / cv::getTickFrequency());
 	std::cout << std::endl << s << std::endl;
