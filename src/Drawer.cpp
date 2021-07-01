@@ -4,19 +4,14 @@ Drawer::Drawer(size_t numColors) {
 	colors = generateColors(numColors);
 }
 
-void Drawer::drawTrajectory(cv::Mat& frame, std::vector<Object>& objects) {
-	for (auto& obj : objects) {
-		if (obj.trajectory.size() > 1) {
-			cv::polylines(frame, obj.trajectory, false, cv::Scalar(0, 0, 0), 4);
-		}
-	}
-}
-void Drawer::drawBboxWithId(cv::Mat& frame, std::vector<Object>& objects) {
-	for (auto& obj : objects)
+void Drawer::drawBboxWithId(cv::Mat& frame, cv::detail::tracking::tbm::TrackedObjects & detections) {
+	for (const auto& detection : detections)
 	{
-		cv::Scalar& color = colors[obj.id % colors.size()];
-		cv::putText(frame, std::to_string(obj.id), obj.pos[0] - cv::Point(5, 5), cv::FONT_HERSHEY_PLAIN, 2, color, 2);
-		cv::rectangle(frame, obj.pos[0], obj.pos[1], color, 2);
+		cv::Scalar& color = colors[detection.object_id % colors.size()];
+		std::string text = std::to_string(detection.object_id) +
+			" conf: " + std::to_string(detection.confidence);
+		cv::putText(frame, text, detection.rect.tl(), cv::FONT_HERSHEY_PLAIN, 1, color, 2);
+		cv::rectangle(frame, detection.rect, color, 2);
 	}
 }
 void Drawer::drawBoundaryLines(cv::Mat& frame, std::vector<BoundaryLine>& boundaryLines) {

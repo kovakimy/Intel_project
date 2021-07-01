@@ -15,19 +15,14 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
-
-
-struct Object {
-	explicit Object(std::vector<cv::Point>& pos, std::vector<float>& feature, int id = -1);
-	std::vector<std::vector<float>> x;
-	std::vector<std::vector<float>> P;
-	std::vector<cv::Point> pos;
-	std::vector<float> feature;
-	int TrackerCounter = 0;
-	int id;
-	std::vector<cv::Point> trajectory;
-	std::chrono::time_point<std::chrono::steady_clock> time;
-};
+#include <opencv2/core/utility.hpp>
+#include <opencv2/tracking.hpp>
+#include <opencv2/tracking/tracking_legacy.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/tracking/tracking_by_matching.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/dnn.hpp>
 
 struct BoundaryLine {
 	explicit BoundaryLine(const cv::Point& p0, const cv::Point& p1);

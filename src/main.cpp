@@ -1,23 +1,10 @@
 #include "../include/ObjectDetector.hpp"
-#include "../include/ObjectTracker.hpp"
 #include "../include/ReidNetwork.hpp"
 #include "../include/LineCrossesAndAreaIntrusionDetection.hpp"
 #include "../include/Drawer.hpp"
 #include "../include/Kalman.hpp"
-#include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/core/utility.hpp>
-#include <opencv2/tracking.hpp>
-#include <opencv2/tracking/tracking_legacy.hpp>
-#include <opencv2/videoio.hpp>
-
-#include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/dnn.hpp>
 #include "../include/ReidDescriptor.hpp"
 
-
-#include <opencv2/tracking/tracking_by_matching.hpp>
 
 #define str "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define pd 60
@@ -29,68 +16,12 @@ void progressBar(double progress) {
 	printf("\r%3d%% [%.*s%*s]", val, left, str, rigth, "");
 	fflush(stdout);
 }
-std::string FLAGS_mReidentification = "C:\\Users\\chris3898\\Intel_project\\models\\person-reidentification-retail-0288.xml";
-std::string FLAGS_cReidentification = "C:\\Users\\chris3898\\Intel_project\\models\\person-reidentification-retail-0288.bin";
+std::string FLAGS_mReidentification = "C:\\Users\\AMusatov\\Intel_project\\models\\person-reidentification-retail-0288.xml";
+std::string FLAGS_cReidentification = "C:\\Users\\AMusatov\\Intel_project\\models\\person-reidentification-retail-0288.bin";
 
 InferenceEngine::Core ie;
 
-//for obj in objects :
-//if len(obj.trajectory) > 1:
-//cv2.polylines(img, np.array([obj.trajectory], np.int32), False, (0, 0, 0), 4)
-
 cv::Ptr<cv::detail::tracking::tbm::ITrackerByMatching> createTrackerByMatchingWithStrongDescriptor();
-
-cv::Mat crop(cv::Mat& img, int xmin, int ymin, int xmax, int ymax) {
-	//	cv::Rect roi;
-	//	roi.x = xmin;
-	//	roi.y = ymin;//img.size().height - ymax;
-		//roi.width = abs(xmax - xmin) - 2;
-		//roi.height = ymax - ymin;
-
-		//cv::Mat crop = img(roi);
-
-	int width = xmax - xmin, height = ymax - ymin;
-
-	cv::Mat ROI(img, cv::Rect(xmin, ymin, width, height));
-
-	cv::Mat crop;
-
-	// Copy the data into new matrix
-	ROI.copyTo(crop);
-
-	//cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);// Create a window for display.
-	//imshow("Display window", crop);
- //   cv::waitKey(0);
-	return crop;
-}
-
-std::vector<Object> turnToObject(std::vector<DetectionObject>& detections, cv::Mat& frame, ReidentificationNet& ri) {
-	std::vector<Object> Objects;//vector of objects from areas_and_blines
-	for (auto detect : detections)
-	{
-		cv::Mat croped = crop(frame, detect.xmin, detect.ymin, detect.xmax, detect.ymax);
-		std::vector<float> features = ri.doEverything(croped);//common method for the work process of the reid network
-		std::vector<cv::Point> position; //coordinates vector, at first min and after max coordinate
-		cv::Point tmp1(detect.xmin, detect.ymin);
-		cv::Point tmp2(detect.xmax, detect.ymax);
-		position.push_back(tmp1);
-		position.push_back(tmp2);
-		Object tmpObject(position, features, -1);
-		Objects.push_back(tmpObject);
-	}
-	return Objects;
-}
-
-std::vector<cv::Rect2d> get_rectangles(const std::vector<Object>& objects)
-{
-    std::vector<cv::Rect2d> rectangles;
-    for (auto obj : objects)
-    {
-        cv::Rect2d rect(obj.pos[0], obj.pos[1]);
-        rectangles.push_back(rect);
-    }
-    return rectangles;
-}
 
 cv::Ptr<cv::detail::tracking::tbm::ITrackerByMatching> createTrackerByMatchingWithStrongDescriptor() {
 	cv::detail::tracking::tbm::TrackerParams params;
@@ -156,9 +87,9 @@ void setUpAreasAndBoundaryLines(cv::Mat& frame, size_t countAreas, size_t countL
 }
 
 int main() {
-	std::string FLAGS_m = "C:\\Users\\chris3898\\Intel_project\\models\\person-detection-0202.xml";
-	std::string FLAGS_c = "C:\\Users\\chris3898\\Intel_project\\models\\person-detection-0202.bin";
-	std::string FLAGS_v = "C:\\Users\\chris3898\\Intel_project\\media\\people-detection.mp4";
+	std::string FLAGS_m = "C:\\Users\\AMusatov\\Intel_project\\models\\person-detection-0202.xml";
+	std::string FLAGS_c = "C:\\Users\\AMusatov\\Intel_project\\models\\person-detection-0202.bin";
+	std::string FLAGS_v = "C:\\Users\\AMusatov\\Intel_project\\media\\people-detection.mp4";
 
 	Detector detector(FLAGS_m, FLAGS_c, ie);
 
@@ -171,12 +102,12 @@ int main() {
 	double frame_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
 	double frame_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-	cv::VideoWriter out("C:\\Users\\chris3898\\Intel_project\\media\\out_detect11.avi",
+	cv::VideoWriter out("C:\\Users\\AMusatov\\Intel_project\\media\\out_detect11.avi",
 		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 	
 	cv::Ptr<cv::detail::tracking::tbm::ITrackerByMatching> tracker = createTrackerByMatchingWithStrongDescriptor();
 
-	int frame_step = 3;
+	int frame_step = 1;
 	int64 time_total = 0;
 
 	LineCrossesAndAreaIntrusionDetection solver = LineCrossesAndAreaIntrusionDetection();
@@ -196,9 +127,9 @@ int main() {
 	}
 
 	std::cout << "Progress bar..." << std::endl;
-	std::vector<Object> new_objects;
-	std::vector<Object> objects;
 	cv::detail::tracking::tbm::TrackedObjects detections;
+	std::vector<size_t> oldIds;
+
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
 	{
 		progressBar(2*(frame_counter + 1) / capture.get(cv::CAP_PROP_FRAME_COUNT));
@@ -225,38 +156,25 @@ int main() {
 		else {
 			detections = tracker->trackedDetections();
 		}
-		// Drawing colored "worms" (tracks).
-		frame = tracker->drawActiveTracks(frame);
 
 		// Drawing all detected objects on a frame by BLUE COLOR
 		for (const auto& detection : detections) {
-			cv::rectangle(frame, detection.rect, cv::Scalar(255, 0, 0), 3);
+			cv::rectangle(frame, detection.rect, cv::Scalar(255, 0, 0), 2);
 		}
 
-		// Drawing tracked detections only by RED color and print ID and detection
-		// confidence level.
-		for (const auto& detection : tracker->trackedDetections()) {
-			cv::rectangle(frame, detection.rect, cv::Scalar(0, 0, 255), 3);
-			std::string text = std::to_string(detection.object_id) +
-				" conf: " + std::to_string(detection.confidence);
-			cv::putText(frame, text, detection.rect.tl(), cv::FONT_HERSHEY_COMPLEX,
-				1.0, cv::Scalar(0, 0, 255), 3);
-		}
-
+		// Drawing colored "worms" (tracks).
+		frame = tracker->drawActiveTracks(frame);
 		
-		////check
-		solver.checkAreaIntrusion(areas, objects);
-		solver.checkLineCrosses(boundaryLines, objects);
-
-		////drawing
-		drawer.drawBboxWithId(frame, objects);
+		drawer.drawBboxWithId(frame, tracker->trackedDetections());
+		solver.checkAreaIntrusion(areas, tracker->trackedDetections());
+		solver.checkLineCrosses(boundaryLines, tracker->getActiveTracks(), oldIds);
 		
-		//drawer.drawTrajectory(frame, objects);
 		drawer.drawBoundaryLines(frame, boundaryLines);
 		drawer.drawAreas(frame, areas);
 
 		out.write(frame);
 	}
+
 	double s = frame_counter / (time_total / cv::getTickFrequency());
 	std::cout << std::endl << s << std::endl;
 	std::cout << "Completed";
