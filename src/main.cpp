@@ -55,7 +55,7 @@ void setUpAreasAndBoundaryLines(cv::Mat& frame, size_t countAreas, size_t countL
 	for (size_t i = 0; i < countAreas; ++i) {
 		std::cout << "Select multiple points for the area " << i << " and press any key."<< std::endl;
 		Parameters params;
-		params.mode = 0; // => setting areas
+		params.mode = 0; // setting areas
 		params.frame = frame;
 		params.windowName = areasWindowName;
 		cv::namedWindow(areasWindowName, 1);
@@ -70,7 +70,7 @@ void setUpAreasAndBoundaryLines(cv::Mat& frame, size_t countAreas, size_t countL
 	for (size_t i = 0; i < countLines; ++i) {
 		std::cout << "Select 2 points for the boundary line " << i << " and press any key." << std::endl;
 		Parameters params;
-		params.mode = 1; // => setting lines
+		params.mode = 1; // setting lines
 		params.frame = frame;
 		params.windowName = linesWindowName;
 		cv::namedWindow(linesWindowName, 1);
@@ -107,7 +107,7 @@ int main() {
 	
 	cv::Ptr<cv::detail::tracking::tbm::ITrackerByMatching> tracker = createTrackerByMatchingWithStrongDescriptor();
 
-	int frame_step = 1;
+	int frame_step = 3;
 	int64 time_total = 0;
 
 	LineCrossesAndAreaIntrusionDetection solver = LineCrossesAndAreaIntrusionDetection();
@@ -128,6 +128,7 @@ int main() {
 
 	std::cout << "Progress bar..." << std::endl;
 	cv::detail::tracking::tbm::TrackedObjects detections;
+	std::unordered_map<size_t, std::vector<cv::Point> > activeTracks;
 	std::vector<size_t> oldIds;
 
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
@@ -152,23 +153,20 @@ int main() {
 
 			frame_time = cv::getTickCount() - frame_time;
 			time_total += frame_time;
-		}
-		else {
-			detections = tracker->trackedDetections();
+
+			solver.checkAreaIntrusion(areas, detections);
+			for (const auto& detection : detections) {
+				cv::rectangle(frame, detection.rect, cv::Scalar(255, 0, 0), 2);
+			}
 		}
 
-		// Drawing all detected objects on a frame by BLUE COLOR
-		for (const auto& detection : detections) {
-			cv::rectangle(frame, detection.rect, cv::Scalar(255, 0, 0), 2);
-		}
-
-		// Drawing colored "worms" (tracks).
-		frame = tracker->drawActiveTracks(frame);
+		detections = tracker->trackedDetections();
+		activeTracks = tracker->getActiveTracks();
 		
-		drawer.drawBboxWithId(frame, tracker->trackedDetections());
-		solver.checkAreaIntrusion(areas, tracker->trackedDetections());
-		solver.checkLineCrosses(boundaryLines, tracker->getActiveTracks(), oldIds);
+		if (frame_counter % frame_step > 0) solver.checkAreaIntrusion(areas, detections);
+		solver.checkLineCrosses(boundaryLines, activeTracks, oldIds);
 		
+		drawer.drawBboxAndTrajectory(frame, detections, activeTracks);
 		drawer.drawBoundaryLines(frame, boundaryLines);
 		drawer.drawAreas(frame, areas);
 
