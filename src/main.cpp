@@ -107,7 +107,7 @@ int main() {
 	
 	cv::Ptr<cv::detail::tracking::tbm::ITrackerByMatching> tracker = createTrackerByMatchingWithStrongDescriptor();
 
-	int frame_step = 3;
+	int frame_step = 1;
 	int64 time_total = 0;
 
 	LineCrossesAndAreaIntrusionDetection solver = LineCrossesAndAreaIntrusionDetection();
@@ -129,7 +129,7 @@ int main() {
 	std::cout << "Progress bar..." << std::endl;
 	cv::detail::tracking::tbm::TrackedObjects detections;
 	std::unordered_map<size_t, std::vector<cv::Point> > activeTracks;
-	std::vector<size_t> oldIds;
+	std::vector<cv::Point> pastSegments;
 
 	while (frame_counter < capture.get(cv::CAP_PROP_FRAME_COUNT))
 	{
@@ -164,7 +164,7 @@ int main() {
 		activeTracks = tracker->getActiveTracks();
 		
 		if (frame_counter % frame_step > 0) solver.checkAreaIntrusion(areas, detections);
-		solver.checkLineCrosses(boundaryLines, activeTracks, oldIds);
+		solver.checkLineCrosses(boundaryLines, activeTracks, pastSegments);
 		
 		drawer.drawBboxAndTrajectory(frame, detections, activeTracks);
 		drawer.drawBoundaryLines(frame, boundaryLines);
