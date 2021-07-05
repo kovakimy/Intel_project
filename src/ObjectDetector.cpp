@@ -1,4 +1,4 @@
-#include "../include/ObjectDetector.hpp"
+#include "ObjectDetector.hpp"
 //#include <samples/ocv_common.hpp>
 
 

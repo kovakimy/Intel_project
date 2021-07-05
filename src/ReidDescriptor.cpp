@@ -1,4 +1,4 @@
-#include "../include/ReidDescriptor.hpp"
+#include "ReidDescriptor.hpp"
 
 ReidDescriptor::ReidDescriptor(const std::string& FLAGS_mReidentification, const std::string& FLAGS_cReidentification, const InferenceEngine::Core& ie) :
     FLAGS_mReidentification(FLAGS_mReidentification),

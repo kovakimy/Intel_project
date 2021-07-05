@@ -1,4 +1,4 @@
-#include "../include/Drawer.hpp"
+#include "Drawer.hpp"
 
 Drawer::Drawer(size_t numColors) {
 	colors = generateColors(numColors);

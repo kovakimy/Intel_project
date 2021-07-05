@@ -1,9 +1,9 @@
-#include "../include/ObjectDetector.hpp"
-#include "../include/ReidNetwork.hpp"
-#include "../include/LineCrossesAndAreaIntrusionDetection.hpp"
-#include "../include/Drawer.hpp"
-#include "../include/Kalman.hpp"
-#include "../include/ReidDescriptor.hpp"
+#include "ObjectDetector.hpp"
+#include "ReidNetwork.hpp"
+#include "LineCrossesAndAreaIntrusionDetection.hpp"
+#include "Drawer.hpp"
+#include "Kalman.hpp"
+#include "ReidDescriptor.hpp"
 
 
 #define str "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
@@ -16,8 +16,8 @@ void progressBar(double progress) {
 	printf("\r%3d%% [%.*s%*s]", val, left, str, rigth, "");
 	fflush(stdout);
 }
-std::string FLAGS_mReidentification = "C:\\Users\\AMusatov\\Intel_project\\models\\person-reidentification-retail-0288.xml";
-std::string FLAGS_cReidentification = "C:\\Users\\AMusatov\\Intel_project\\models\\person-reidentification-retail-0288.bin";
+std::string FLAGS_mReidentification = "../models/person-reidentification-retail-0288.xml";
+std::string FLAGS_cReidentification = "../models/person-reidentification-retail-0288.bin";
 
 InferenceEngine::Core ie;
 
@@ -87,9 +87,9 @@ void setUpAreasAndBoundaryLines(cv::Mat& frame, size_t countAreas, size_t countL
 }
 
 int main() {
-	std::string FLAGS_m = "C:\\Users\\AMusatov\\Intel_project\\models\\person-detection-0202.xml";
-	std::string FLAGS_c = "C:\\Users\\AMusatov\\Intel_project\\models\\person-detection-0202.bin";
-	std::string FLAGS_v = "C:\\Users\\AMusatov\\Intel_project\\media\\people-detection.mp4";
+	std::string FLAGS_m = "../models/person-detection-0202.xml";
+	std::string FLAGS_c = "../models/person-detection-0202.bin";
+	std::string FLAGS_v = "../media/people-detection.mp4";
 
 	Detector detector(FLAGS_m, FLAGS_c, ie);
 
@@ -102,7 +102,7 @@ int main() {
 	double frame_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
 	double frame_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-	cv::VideoWriter out("C:\\Users\\AMusatov\\Intel_project\\media\\out_detect11.avi",
+	cv::VideoWriter out("../media/out_detect11.avi",
 		cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height), true);
 	
 	cv::Ptr<cv::detail::tracking::tbm::ITrackerByMatching> tracker = createTrackerByMatchingWithStrongDescriptor();

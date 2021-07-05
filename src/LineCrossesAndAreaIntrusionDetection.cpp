@@ -1,4 +1,4 @@
-#include "../include/LineCrossesAndAreaIntrusionDetection.hpp"
+#include "LineCrossesAndAreaIntrusionDetection.hpp"
 
 LineCrossesAndAreaIntrusionDetection::LineCrossesAndAreaIntrusionDetection() {}
 
