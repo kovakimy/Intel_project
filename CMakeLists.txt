@@ -10,7 +10,7 @@ include/ReidNetwork.hpp include/ExtendedTracker include/ReidDescriptor.hpp inclu
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src
 										   PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${InferenceEngine_LIBRARIES} ${NGRAPH_LIBRARIES})
-message("TEST" ${OpenCV_DIR})
+
 add_custom_command( TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         ${OpenCV_DIR}"/bin/Debug/opencv_world453d.dll"
